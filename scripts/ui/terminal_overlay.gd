@@ -30,6 +30,7 @@ var _solved_terminals: Dictionary = {}
 
 var _is_open: bool = false
 var _is_running_steps: bool = false
+var _run_token: int = 0
 var _step_delay: float = 0.42
 var _locked_lines_map: Dictionary = {}
 var _suppress_text_change: bool = false
@@ -91,6 +92,7 @@ func open_terminal(terminal_id: String, config: Dictionary, total_terminals: int
 	_suppress_text_change = true
 	_code_edit.text = code_to_show
 	_suppress_text_change = false
+	_apply_locked_gutter_icons()
 	_clear_line_highlights()
 	_refresh_tool_gating()
 
@@ -113,6 +115,10 @@ func open_terminal(terminal_id: String, config: Dictionary, total_terminals: int
 func close_terminal() -> void:
 	if not _is_open:
 		return
+	_run_token += 1
+	_is_running_steps = false
+	if is_instance_valid(_run_btn):
+		_run_btn.disabled = false
 	if not _current_terminal_id.is_empty() and is_instance_valid(_code_edit):
 		_saved_codes[_current_terminal_id] = _code_edit.text
 	var player = get_tree().get_first_node_in_group("player")
@@ -141,9 +147,17 @@ func _setup_locked_lines(initial_code: String, locked_indices: Array) -> void:
 			_locked_lines_map[line_idx] = lines[line_idx]
 			lock_nums.append(str(line_idx + 1))
 	if lock_nums.size() > 0:
-		_locked_info_label.text = "🔒 Baris terkunci: Baris " + ", ".join(lock_nums) + " (fokus perbaiki baris lainnya)"
+		_locked_info_label.text = "Baris terkunci: Baris " + ", ".join(lock_nums) + " (fokus perbaiki baris lainnya)"
 	else:
-		_locked_info_label.text = "✏️ Semua baris kode dapat diedit"
+		_locked_info_label.text = "Semua baris kode dapat diedit"
+
+
+func _apply_locked_gutter_icons() -> void:
+	if not is_instance_valid(_code_edit) or _code_edit.get_gutter_count() <= 0:
+		return
+	var lock_tex: Texture2D = load("res://assets/ui/ui_lock_codeline_16.png") if ResourceLoader.exists("res://assets/ui/ui_lock_codeline_16.png") else null
+	for i in range(_code_edit.get_line_count()):
+		_code_edit.set_line_gutter_icon(i, 0, lock_tex if _locked_lines_map.has(i) else null)
 
 
 func _on_code_text_changed() -> void:
@@ -202,6 +216,8 @@ func _on_run_pressed() -> void:
 
 
 func _animate_execution(res: Dictionary) -> void:
+	_run_token += 1
+	var my_token: int = _run_token
 	_is_running_steps = true
 	_run_btn.disabled = true
 	_output_rtl.clear()
@@ -209,8 +225,11 @@ func _animate_execution(res: Dictionary) -> void:
 
 	var steps: Array = res.get("steps", [])
 	for step in steps:
-		if not _is_open:
-			break
+		if not _is_open or not is_inside_tree() or my_token != _run_token:
+			_is_running_steps = false
+			if is_instance_valid(_run_btn):
+				_run_btn.disabled = false
+			return
 		_clear_line_highlights()
 		var line_idx: int = int(step.get("line", 1)) - 1
 		var step_err: String = str(step.get("error", ""))
@@ -247,6 +266,17 @@ func _animate_execution(res: Dictionary) -> void:
 
 		if _step_delay > 0.0:
 			await get_tree().create_timer(_step_delay).timeout
+			if not is_inside_tree() or not _is_open or my_token != _run_token:
+				_is_running_steps = false
+				if is_instance_valid(_run_btn):
+					_run_btn.disabled = false
+				return
+
+	if not is_inside_tree() or not _is_open or my_token != _run_token:
+		_is_running_steps = false
+		if is_instance_valid(_run_btn):
+			_run_btn.disabled = false
+		return
 
 	_clear_line_highlights()
 	_evaluate_terminal_goal(res)
@@ -335,6 +365,7 @@ func _on_reset_pressed() -> void:
 	_suppress_text_change = true
 	_code_edit.text = initial_code
 	_suppress_text_change = false
+	_apply_locked_gutter_icons()
 	_clear_line_highlights()
 	_output_rtl.clear()
 	_output_rtl.append_text("[color=#94a3b8]Kode telah dikembalikan ke kondisi awal.[/color]")
@@ -425,15 +456,31 @@ func _build_ui() -> void:
 	left_vbox.size_flags_stretch_ratio = 1.25
 	body_hbox.add_child(left_vbox)
 
+	var lock_info_hbox := HBoxContainer.new()
+	lock_info_hbox.add_theme_constant_override("separation", 6)
+	left_vbox.add_child(lock_info_hbox)
+
+	if ResourceLoader.exists("res://assets/ui/ui_lock_codeline_16.png"):
+		var lock_hdr_icon := TextureRect.new()
+		lock_hdr_icon.texture = load("res://assets/ui/ui_lock_codeline_16.png")
+		lock_hdr_icon.custom_minimum_size = Vector2(16, 16)
+		lock_hdr_icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		lock_hdr_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		lock_info_hbox.add_child(lock_hdr_icon)
+
 	_locked_info_label = Label.new()
 	_locked_info_label.add_theme_font_size_override("font_size", 12)
 	_locked_info_label.add_theme_color_override("font_color", Color(0.75, 0.82, 0.92))
-	left_vbox.add_child(_locked_info_label)
+	lock_info_hbox.add_child(_locked_info_label)
 
 	_code_edit = CodeEdit.new()
 	_code_edit.name = "CodeEditor"
 	_code_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_code_edit.gutters_draw_line_numbers = true
+	_code_edit.add_gutter(0)
+	_code_edit.set_gutter_type(0, CodeEdit.GUTTER_TYPE_ICON)
+	_code_edit.set_gutter_width(0, 20)
+	_code_edit.set_gutter_name(0, "lock_gutter")
 	_code_edit.indent_automatic = true
 	_code_edit.auto_brace_completion_enabled = true
 	_code_edit.add_theme_font_size_override("font_size", 16)
@@ -550,19 +597,43 @@ func _refresh_tool_gating() -> void:
 	var has_print_tool: bool = sm.call("is_tool_unlocked", "print_tool") if sm else false
 	var has_speed_tool: bool = sm.call("is_tool_unlocked", "speed_selector") if sm else false
 
+	var lock_icon_tex: Texture2D = load("res://assets/ui/ui_lock_feature_24.png") if ResourceLoader.exists("res://assets/ui/ui_lock_feature_24.png") else null
+	var print_icon_tex: Texture2D = null
+	var speed_icon_tex: Texture2D = null
+	if ResourceLoader.exists("res://assets/ui/ui_tools_24_sheet.png"):
+		var tools_sheet: Texture2D = load("res://assets/ui/ui_tools_24_sheet.png")
+		if tools_sheet:
+			var at_print := AtlasTexture.new()
+			at_print.atlas = tools_sheet
+			at_print.region = Rect2(1 * 24, 0, 24, 24)
+			at_print.filter_clip = true
+			print_icon_tex = at_print
+
+			var at_speed := AtlasTexture.new()
+			at_speed.atlas = tools_sheet
+			at_speed.region = Rect2(5 * 24, 0, 24, 24)
+			at_speed.filter_clip = true
+			speed_icon_tex = at_speed
+
 	if is_instance_valid(_insert_print_btn):
 		_insert_print_btn.disabled = not has_print_tool
-		_insert_print_btn.text = "+ print()" if has_print_tool else "🔒 + print()"
+		_insert_print_btn.text = "+ print()"
+		_insert_print_btn.icon = print_icon_tex if has_print_tool else lock_icon_tex
+		_insert_print_btn.add_theme_constant_override("icon_max_width", 18)
 		_insert_print_btn.tooltip_text = "Sisipkan template print(variabel) di baris kursor" if has_print_tool else "Tamatkan Level 2 untuk membuka Quick-Insert Print Tool"
 
 	if is_instance_valid(_speed_2x_btn):
 		_speed_2x_btn.disabled = not has_speed_tool
-		_speed_2x_btn.text = "2x" if has_speed_tool else "🔒 2x"
+		_speed_2x_btn.text = "2x"
+		_speed_2x_btn.icon = speed_icon_tex if has_speed_tool else lock_icon_tex
+		_speed_2x_btn.add_theme_constant_override("icon_max_width", 16)
 		_speed_2x_btn.tooltip_text = "Kecepatan eksekusi 2x" if has_speed_tool else "Tamatkan Level 3 untuk membuka Kecepatan Eksekusi 2x/Skip"
 
 	if is_instance_valid(_speed_skip_btn):
 		_speed_skip_btn.disabled = not has_speed_tool
-		_speed_skip_btn.text = "Skip" if has_speed_tool else "🔒 Skip"
+		_speed_skip_btn.text = "Skip"
+		_speed_skip_btn.icon = speed_icon_tex if has_speed_tool else lock_icon_tex
+		_speed_skip_btn.add_theme_constant_override("icon_max_width", 16)
 		_speed_skip_btn.tooltip_text = "Lewati animasi eksekusi baris" if has_speed_tool else "Tamatkan Level 3 untuk membuka Kecepatan Eksekusi 2x/Skip"
 
 	if not has_speed_tool and is_instance_valid(_speed_1x_btn):

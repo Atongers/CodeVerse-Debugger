@@ -114,6 +114,7 @@ const TERMINAL_CONFIGS := {
 var _is_overview_cam: bool = false
 var _solved_terminals: Dictionary = {}
 var _bug_log_entries: Array[Dictionary] = []
+var _hud_top_bar: HudTopBar = null
 var _hud_progress_label: Label = null
 var _hud_bug_log_btn: Button = null
 var _bug_log_modal: PanelContainer = null
@@ -193,6 +194,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_L:
 			if not (terminal_overlay and terminal_overlay.has_method("is_open") and terminal_overlay.is_open()):
 				_toggle_bug_log_modal(false)
+		elif event.keycode == KEY_ESCAPE:
+			if _hud_top_bar and _hud_top_bar.is_pause_popup_open():
+				_hud_top_bar.close_pause_popup()
+				get_viewport().set_input_as_handled()
+			elif _bug_log_modal and _bug_log_modal.visible:
+				_bug_log_modal.visible = false
+				get_viewport().set_input_as_handled()
 
 
 func _toggle_camera() -> void:
@@ -253,164 +261,33 @@ func _setup_runtime() -> void:
 
 
 func _setup_hud_extras() -> void:
-	var hbox: HBoxContainer = get_node_or_null("HUD/TopBar/Margin/HBox")
-	if not hbox:
+	var hud_layer: CanvasLayer = get_node_or_null("HUD")
+	if not hud_layer:
 		return
-	var top_bar: PanelContainer = get_node_or_null("HUD/TopBar")
-	if top_bar:
-		top_bar.offset_left = 10.0
-		top_bar.offset_top = 6.0
-		top_bar.offset_right = 1142.0
-		top_bar.offset_bottom = 40.0
 
-	if not _hp_bar:
-		var hp_cluster := HBoxContainer.new()
-		hp_cluster.name = "HPCluster"
-		hp_cluster.alignment = BoxContainer.ALIGNMENT_CENTER
-		hp_cluster.add_theme_constant_override("separation", 6)
+	_hud_top_bar = HudTopBar.attach_to_hud(hud_layer, dex, TOTAL_TERMINALS)
+	if _hud_top_bar:
+		hud_status = _hud_top_bar.status_label
+		_hud_progress_label = _hud_top_bar.progress_label
+		_hud_bug_log_btn = _hud_top_bar.bug_log_btn
+		_hp_bar = _hud_top_bar.hp_bar
+		_en_bar = _hud_top_bar.en_bar
+		_hud_top_bar.bug_log_requested.connect(func() -> void: _toggle_bug_log_modal(false))
 
-		var hp_lbl := Label.new()
-		hp_lbl.text = "HP"
-		hp_lbl.add_theme_font_size_override("font_size", 11)
-		hp_lbl.add_theme_color_override("font_color", Color(0.29, 0.87, 0.5))
-		hp_cluster.add_child(hp_lbl)
-
-		_hp_bar = ProgressBar.new()
-		_hp_bar.name = "HPBar"
-		_hp_bar.custom_minimum_size = Vector2(80, 14)
-		_hp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		_hp_bar.show_percentage = false
-		_hp_bar.max_value = 100.0
-		_hp_bar.value = 100.0
-
-		var hp_bg_sb := StyleBoxFlat.new()
-		hp_bg_sb.bg_color = Color(0.05, 0.08, 0.14, 0.95)
-		hp_bg_sb.border_color = Color(0.2, 0.28, 0.38)
-		hp_bg_sb.set_border_width_all(1)
-		hp_bg_sb.set_corner_radius_all(3)
-		_hp_bar.add_theme_stylebox_override("background", hp_bg_sb)
-
-		_hp_fill_sb = StyleBoxFlat.new()
-		_hp_fill_sb.bg_color = Color(0.14, 0.77, 0.37)
-		_hp_fill_sb.set_corner_radius_all(2)
-		_hp_bar.add_theme_stylebox_override("fill", _hp_fill_sb)
-		hp_cluster.add_child(_hp_bar)
-
-		_hp_label = Label.new()
-		_hp_label.name = "HPValue"
-		_hp_label.text = "100/100"
-		_hp_label.add_theme_font_size_override("font_size", 10)
-		_hp_label.add_theme_color_override("font_color", Color(0.8, 0.85, 0.9))
-		hp_cluster.add_child(_hp_label)
-		hbox.add_child(hp_cluster)
-
-	if not _en_bar:
-		var en_cluster := HBoxContainer.new()
-		en_cluster.name = "ENCluster"
-		en_cluster.alignment = BoxContainer.ALIGNMENT_CENTER
-		en_cluster.add_theme_constant_override("separation", 6)
-
-		var en_lbl := Label.new()
-		en_lbl.text = "EN"
-		en_lbl.add_theme_font_size_override("font_size", 11)
-		en_lbl.add_theme_color_override("font_color", Color(0.22, 0.74, 0.97))
-		en_cluster.add_child(en_lbl)
-
-		_en_bar = ProgressBar.new()
-		_en_bar.name = "ENBar"
-		_en_bar.custom_minimum_size = Vector2(80, 14)
-		_en_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		_en_bar.show_percentage = false
-		_en_bar.max_value = 100.0
-		_en_bar.value = 100.0
-
-		var en_bg_sb := StyleBoxFlat.new()
-		en_bg_sb.bg_color = Color(0.05, 0.08, 0.14, 0.95)
-		en_bg_sb.border_color = Color(0.2, 0.28, 0.38)
-		en_bg_sb.set_border_width_all(1)
-		en_bg_sb.set_corner_radius_all(3)
-		_en_bar.add_theme_stylebox_override("background", en_bg_sb)
-
-		_en_fill_sb = StyleBoxFlat.new()
-		_en_fill_sb.bg_color = Color(0.02, 0.71, 0.83)
-		_en_fill_sb.set_corner_radius_all(2)
-		_en_bar.add_theme_stylebox_override("fill", _en_fill_sb)
-		en_cluster.add_child(_en_bar)
-
-		_en_label = Label.new()
-		_en_label.name = "ENValue"
-		_en_label.text = "100/100"
-		_en_label.add_theme_font_size_override("font_size", 10)
-		_en_label.add_theme_color_override("font_color", Color(0.8, 0.85, 0.9))
-		en_cluster.add_child(_en_label)
-		hbox.add_child(en_cluster)
-
-		var vit_sep := VSeparator.new()
-		vit_sep.name = "VitalitySep"
-		hbox.add_child(vit_sep)
-
-		hbox.move_child(hbox.get_node("HPCluster"), 0)
-		hbox.move_child(hbox.get_node("ENCluster"), 1)
-		hbox.move_child(vit_sep, 2)
-
-	if dex:
-		if not dex.health_changed.is_connected(_on_dex_health_changed):
-			dex.health_changed.connect(_on_dex_health_changed)
-		if not dex.energy_changed.is_connected(_on_dex_energy_changed):
-			dex.energy_changed.connect(_on_dex_energy_changed)
-		if "health" in dex and "max_health" in dex:
-			_on_dex_health_changed(dex.health, dex.max_health)
-		if "energy" in dex and "max_energy" in dex:
-			_on_dex_energy_changed(dex.energy, dex.max_energy)
-
-	if hud_status:
-		hud_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hud_status.custom_minimum_size = Vector2(200, 0)
-		hud_status.clip_text = true
-		hud_status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		hud_status.add_theme_font_size_override("font_size", 12)
-		if not _status_icon:
-			_status_icon = _make_ui_icon_rect(2)
-			_status_icon.name = "StatusIcon"
-			hbox.add_child(_status_icon)
-			hbox.move_child(_status_icon, hud_status.get_index())
-
-	if not _hud_progress_label:
-		if not _cam_icon:
-			_cam_icon = _make_ui_icon_rect(3)
-			_cam_icon.name = "CamIcon"
-			hbox.add_child(_cam_icon)
-		_hud_progress_label = Label.new()
-		_hud_progress_label.name = "ProgressLabel"
-		_hud_progress_label.add_theme_font_size_override("font_size", 13)
-		_hud_progress_label.add_theme_color_override("font_color", Color(0.45, 0.9, 1.0))
-		hbox.add_child(_hud_progress_label)
-
-	var sep := VSeparator.new()
-	hbox.add_child(sep)
-
-	if not _hud_bug_log_btn:
-		_hud_bug_log_btn = Button.new()
-		_hud_bug_log_btn.name = "BugLogBtn"
-		_hud_bug_log_btn.text = "Bug Log (0/5) [L]"
-		_hud_bug_log_btn.add_theme_font_size_override("font_size", 12)
-		_hud_bug_log_btn.pressed.connect(func() -> void: _toggle_bug_log_modal(false))
-		hbox.add_child(_hud_bug_log_btn)
-
-	var sep2 := VSeparator.new()
-	hbox.add_child(sep2)
-
-	var menu_btn := Button.new()
-	menu_btn.name = "MenuBtn"
-	menu_btn.text = "Menu Utama"
-	menu_btn.add_theme_font_size_override("font_size", 12)
-	menu_btn.pressed.connect(func() -> void:
-		get_tree().change_scene_to_file("res://scenes/ui/menus/main_menu.tscn")
-	)
-	hbox.add_child(menu_btn)
-
+	_setup_debug_dock()
 	_build_bug_log_modal()
 	_build_lint_toast()
+
+
+func _setup_debug_dock() -> void:
+	var hud_layer: CanvasLayer = get_node_or_null("HUD")
+	if not hud_layer or hud_layer.has_node("DebugToolDock"):
+		return
+	var dock := DebugToolDock.new()
+	dock.name = "DebugToolDock"
+	dock.bug_log_requested.connect(func() -> void: _toggle_bug_log_modal(false))
+	dock.tool_info_requested.connect(func(_slot_id: String, msg: String) -> void: _update_hud_display(msg))
+	hud_layer.add_child(dock)
 
 
 func _make_ui_icon_rect(frame_idx: int) -> TextureRect:
@@ -455,7 +332,7 @@ func _build_lint_toast() -> void:
 	_toast_panel.visible = false
 	_toast_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_toast_panel.offset_left = 180.0
-	_toast_panel.offset_right = -180.0
+	_toast_panel.offset_right = -316.0
 	_toast_panel.offset_top = -68.0
 	_toast_panel.offset_bottom = -14.0
 
@@ -492,36 +369,16 @@ func _build_bug_log_modal() -> void:
 	if not hud_layer or _bug_log_modal:
 		return
 
-	_bug_log_modal = PanelContainer.new()
+	var book_icon := UiPixelTheme.load_atlas(UiPixelTheme.TEX_TOOLS_24, Rect2(6 * 24, 0, 24, 24))
+	var shell := UiPixelTheme.build_modal_shell("BUG LOG — DUNIA 1 LEVEL 3", Vector2(760, 440), book_icon)
+	_bug_log_modal = shell["modal"]
 	_bug_log_modal.name = "BugLogModal"
-	_bug_log_modal.visible = false
-	_bug_log_modal.set_anchors_preset(Control.PRESET_CENTER)
-	_bug_log_modal.custom_minimum_size = Vector2(760, 440)
-	_bug_log_modal.offset_left = -380.0
-	_bug_log_modal.offset_top = -220.0
-	_bug_log_modal.offset_right = 380.0
-	_bug_log_modal.offset_bottom = 220.0
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.1, 0.14, 0.98)
-	style.border_color = Color(0.3, 0.85, 1.0, 0.9)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 14
-	style.content_margin_bottom = 14
-	_bug_log_modal.add_theme_stylebox_override("panel", style)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 10)
-	_bug_log_modal.add_child(vbox)
-
-	_bug_log_title = Label.new()
-	_bug_log_title.text = "BUG LOG — DUNIA 1 LEVEL 3"
-	_bug_log_title.add_theme_font_size_override("font_size", 18)
+	_bug_log_title = shell["title_label"]
 	_bug_log_title.add_theme_color_override("font_color", Color(0.45, 0.92, 1.0))
-	vbox.add_child(_bug_log_title)
+	var top_close_btn: TextureButton = shell["close_btn"]
+	top_close_btn.pressed.connect(func() -> void: _bug_log_modal.visible = false)
+
+	var vbox: VBoxContainer = shell["outer_vbox"]
 
 	_bug_log_subtitle = Label.new()
 	_bug_log_subtitle.text = "Catatan bug Python Level 3:"
@@ -547,14 +404,16 @@ func _build_bug_log_modal() -> void:
 	var menu_btn := Button.new()
 	menu_btn.text = "Kembali ke Main Menu"
 	menu_btn.custom_minimum_size = Vector2(160, 34)
+	UiPixelTheme.apply_pixel_button(menu_btn, "primary", 12, 6)
 	menu_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/ui/menus/main_menu.tscn")
 	)
 	btn_row.add_child(menu_btn)
 
 	var close_btn := Button.new()
-	close_btn.text = "Tutup [L]"
-	close_btn.custom_minimum_size = Vector2(120, 34)
+	close_btn.text = "Tutup [L / Esc]"
+	close_btn.custom_minimum_size = Vector2(130, 34)
+	UiPixelTheme.apply_pixel_button(close_btn, "secondary", 12, 6)
 	close_btn.pressed.connect(func() -> void: _bug_log_modal.visible = false)
 	btn_row.add_child(close_btn)
 
@@ -586,47 +445,17 @@ func _toggle_bug_log_modal(is_level_clear: bool) -> void:
 		_bug_log_vbox.add_child(empty_lbl)
 	else:
 		for entry in _bug_log_entries:
-			var card := PanelContainer.new()
-			var c_style := StyleBoxFlat.new()
-			c_style.bg_color = Color(0.12, 0.15, 0.2, 1.0)
-			c_style.border_color = Color(0.25, 0.55, 0.75, 0.8)
-			c_style.set_border_width_all(1)
-			c_style.set_corner_radius_all(5)
-			c_style.content_margin_left = 10
-			c_style.content_margin_right = 10
-			c_style.content_margin_top = 8
-			c_style.content_margin_bottom = 8
-			card.add_theme_stylebox_override("panel", c_style)
-
-			var cv := VBoxContainer.new()
-			cv.add_theme_constant_override("separation", 3)
-			card.add_child(cv)
-
-			var h_lbl := Label.new()
-			h_lbl.text = "[%s] %s" % [entry.get("terminal_id", ""), entry.get("bug_type", "")]
-			h_lbl.add_theme_font_size_override("font_size", 13)
-			h_lbl.add_theme_color_override("font_color", Color(1.0, 0.84, 0.35))
-			cv.add_child(h_lbl)
-
-			var diff_lbl := Label.new()
-			diff_lbl.text = "Salah : %s\nBenar : %s" % [entry.get("broken_code", ""), entry.get("fixed_code", "")]
-			diff_lbl.add_theme_font_size_override("font_size", 12)
-			diff_lbl.add_theme_color_override("font_color", Color(0.6, 0.95, 0.7))
-			cv.add_child(diff_lbl)
-
-			var exp_lbl := Label.new()
-			exp_lbl.text = "Penjelasan: " + String(entry.get("explanation", ""))
-			exp_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			exp_lbl.add_theme_font_size_override("font_size", 12)
-			exp_lbl.add_theme_color_override("font_color", Color(0.85, 0.9, 0.96))
-			cv.add_child(exp_lbl)
-
-			_bug_log_vbox.add_child(card)
+			_bug_log_vbox.add_child(UiPixelTheme.build_bug_card(entry, true))
 
 	_bug_log_modal.visible = true
 
 
 func _update_hud_display(objective_text: String = "") -> void:
+	if _hud_top_bar:
+		if not objective_text.is_empty():
+			_hud_top_bar.set_status(objective_text)
+		_hud_top_bar.set_progress(_solved_terminals.size(), TOTAL_TERMINALS)
+		return
 	if hud_status and not objective_text.is_empty():
 		hud_status.text = objective_text
 	var solved_count: int = _solved_terminals.size()

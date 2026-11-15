@@ -221,6 +221,88 @@
       "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
       "license": "project-internal",
       "technical_checks_passed": true
-    }
+    },
+    {
+      "path": "res://assets/ui/ui_tools_24_sheet.png",
+      "category": "ui",
+      "size_px": [168, 48],
+      "frame_px": [24, 24],
+      "grid": [7, 2],
+      "icons": ["output_terminal", "print_tool", "step_trace", "watch_var", "breakpoint", "speed_2x_skip", "bug_log"],
+      "rows": ["unlocked", "locked_silhouette"],
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_dock_frame_9slice.png",
+      "category": "ui",
+      "size_px": [48, 48],
+      "nine_slice_margin_px": 12,
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_tool_slot_sheet.png",
+      "category": "ui",
+      "size_px": [128, 32],
+      "frame_px": [32, 32],
+      "frames": 4,
+      "states": ["locked", "unlocked", "active_hover", "new_shimmer"],
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_unlock_toast_9slice.png",
+      "category": "ui",
+      "size_px": [64, 48],
+      "nine_slice_margin_px": 14,
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_lock_feature_24.png",
+      "category": "ui",
+      "size_px": [24, 24],
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_lock_codeline_16.png",
+      "category": "ui",
+      "size_px": [16, 16],
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/ui_lock_open_anim.png",
+      "category": "ui",
+      "size_px": [96, 24],
+      "frame_px": [24, 24],
+      "frames": 4,
+      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    { "path": "res://assets/ui/rework/ui_modal_frame_9slice.png", "category": "ui", "size_px": [64, 64], "nine_slice_margin_px": 16, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_card_frames_sheet.png", "category": "ui", "size_px": [144, 48], "frame_px": [48, 48], "frames": 3, "nine_slice_margin_px": 10, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_btn_pixel_9slice_sheet.png", "category": "ui", "size_px": [128, 96], "frame_px": [32, 32], "grid": [4, 3], "nine_slice_margin_px": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_btn_close_sheet.png", "category": "ui", "size_px": [72, 24], "frame_px": [24, 24], "frames": 3, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_hud_containers_sheet.png", "category": "ui", "size_px": [96, 48], "frame_px": [48, 48], "frames": 2, "nine_slice_margin_px": 10, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_hud_vital_bars_sheet.png", "category": "ui", "size_px": [96, 64], "frame_px": [32, 32], "grid": [3, 2], "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_hud_icons_16_sheet.png", "category": "ui", "size_px": [128, 16], "frame_px": [16, 16], "frames": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_level_state_icons_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [16, 16], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_bug_tags_sheet.png", "category": "ui", "size_px": [80, 16], "frame_px": [16, 16], "frames": 5, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_code_diff_box_9slice.png", "category": "ui", "size_px": [64, 32], "frame_px": [32, 32], "frames": 2, "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_settings_icons_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [16, 16], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_slider_track_9slice.png", "category": "ui", "size_px": [64, 16], "frame_px": [32, 16], "frames": 2, "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_slider_grabber_sheet.png", "category": "ui", "size_px": [32, 16], "frame_px": [16, 16], "frames": 2, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_toggle_switch_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [32, 16], "frames": 2, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
+    { "path": "res://assets/ui/rework/ui_keycap_9slice.png", "category": "ui", "size_px": [24, 24], "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true }
   ]
 }

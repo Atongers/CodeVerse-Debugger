@@ -382,7 +382,7 @@ func _make_sheet_icon(sheet_path: String, col_idx: int, total_cols: int) -> Atla
 	var tex: Texture2D = load(sheet_path)
 	if not tex:
 		return null
-	var frame_w := int(tex.get_width() / maxi(1, total_cols))
+	var frame_w := int(float(tex.get_width()) / float(maxi(1, total_cols)))
 	var at := AtlasTexture.new()
 	at.atlas = tex
 	at.region = Rect2(col_idx * frame_w, 0, frame_w, tex.get_height())
@@ -907,7 +907,8 @@ func _refresh_modals_after_progression() -> void:
 
 
 func _build_level_select_modal() -> void:
-	_level_select_modal = _create_base_modal("PILIH DUNIA DAN LEVEL", Vector2(740, 460))
+	var header_icon := UiPixelTheme.load_atlas(UiPixelTheme.TEX_WORLD_BADGES, Rect2(0, 0, 16, 16))
+	_level_select_modal = _create_base_modal("PILIH DUNIA DAN LEVEL", Vector2(740, 480), header_icon)
 	add_child(_level_select_modal)
 
 	var vbox: VBoxContainer = _level_select_modal.get_node("OuterVBox/ContentScroll/VBox")
@@ -952,25 +953,30 @@ func _build_level_select_modal() -> void:
 
 	for w in worlds:
 		var item := PanelContainer.new()
+		item.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var is_unlocked: bool = bool(w["unlocked"])
-		var i_style := StyleBoxFlat.new()
-		i_style.bg_color = Color(0.1, 0.13, 0.19, 0.95) if is_unlocked else Color(0.07, 0.08, 0.11, 0.8)
-		i_style.border_color = COLOR_CYAN if is_unlocked else Color(0.2, 0.25, 0.32, 0.6)
-		i_style.set_border_width_all(1)
-		i_style.set_corner_radius_all(6)
-		i_style.content_margin_left = 14
-		i_style.content_margin_right = 14
-		i_style.content_margin_top = 10
-		i_style.content_margin_bottom = 10
-		item.add_theme_stylebox_override("panel", i_style)
+		item.add_theme_stylebox_override("panel", UiPixelTheme.make_card_style(0 if is_unlocked else 2, 14, 10))
 
 		var ih := HBoxContainer.new()
 		ih.add_theme_constant_override("separation", 14)
 		item.add_child(ih)
 
+		var w_badge_tex := UiPixelTheme.load_atlas(UiPixelTheme.TEX_WORLD_BADGES, Rect2(int(w["id"]) * 16, 0, 16, 16))
+		var w_badge := UiPixelTheme.make_icon_rect(w_badge_tex, Vector2(24, 24))
+		w_badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		ih.add_child(w_badge)
+
 		var iv := VBoxContainer.new()
 		iv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		ih.add_child(iv)
+
+		var title_row := HBoxContainer.new()
+		title_row.add_theme_constant_override("separation", 6)
+		iv.add_child(title_row)
+
+		var state_col: int = 2 if is_unlocked else 3
+		var state_tex := UiPixelTheme.load_atlas(UiPixelTheme.TEX_LEVEL_STATE_ICONS, Rect2(state_col * 16, 0, 16, 16))
+		title_row.add_child(UiPixelTheme.make_icon_rect(state_tex, Vector2(16, 16)))
 
 		var w_name := Label.new()
 		w_name.text = str(w["name"])
@@ -978,7 +984,7 @@ func _build_level_select_modal() -> void:
 			w_name.add_theme_font_override("font", _font_bold)
 		w_name.add_theme_font_size_override("font_size", 14)
 		w_name.add_theme_color_override("font_color", COLOR_GREEN if is_unlocked else Color(0.55, 0.6, 0.7))
-		iv.add_child(w_name)
+		title_row.add_child(w_name)
 
 		var w_concept := Label.new()
 		w_concept.text = "Konsep: %s | Status: %s" % [str(w["concept"]), str(w["status"])]
@@ -1000,46 +1006,69 @@ func _build_level_select_modal() -> void:
 			ih.add_child(btn_box)
 
 			var play_btn := Button.new()
-			play_btn.text = "✓ Level 1" if l1_done else "Level 1"
+			play_btn.text = "Level 1"
+			play_btn.icon = UiPixelTheme.load_atlas(UiPixelTheme.TEX_LEVEL_STATE_ICONS, Rect2(16 if l1_done else 0, 0, 16, 16))
+			play_btn.add_theme_constant_override("icon_max_width", 16)
 			if _font_semibold:
 				play_btn.add_theme_font_override("font", _font_semibold)
 			play_btn.custom_minimum_size = Vector2(104, 34)
+			UiPixelTheme.apply_pixel_button(play_btn, "primary", 10, 6)
 			play_btn.pressed.connect(_on_continue_pressed)
 			btn_box.add_child(play_btn)
 
 			var l2_btn := Button.new()
-			l2_btn.text = "✓ Level 2" if l2_done else "Level 2"
+			l2_btn.text = "Level 2"
+			l2_btn.icon = UiPixelTheme.load_atlas(UiPixelTheme.TEX_LEVEL_STATE_ICONS, Rect2(16 if l2_done else 0, 0, 16, 16))
+			l2_btn.add_theme_constant_override("icon_max_width", 16)
 			if _font_semibold:
 				l2_btn.add_theme_font_override("font", _font_semibold)
 			l2_btn.custom_minimum_size = Vector2(104, 34)
+			UiPixelTheme.apply_pixel_button(l2_btn, "primary", 10, 6)
 			l2_btn.pressed.connect(func() -> void:
 				get_tree().change_scene_to_file("res://scenes/levels/world_1_syntax_shore/level_2.tscn")
 			)
 			btn_box.add_child(l2_btn)
 
 			var l3_btn := Button.new()
-			l3_btn.text = "✓ Level 3" if l3_done else "Level 3"
+			l3_btn.text = "Level 3"
+			l3_btn.icon = UiPixelTheme.load_atlas(UiPixelTheme.TEX_LEVEL_STATE_ICONS, Rect2(16 if l3_done else 0, 0, 16, 16))
+			l3_btn.add_theme_constant_override("icon_max_width", 16)
 			if _font_semibold:
 				l3_btn.add_theme_font_override("font", _font_semibold)
 			l3_btn.custom_minimum_size = Vector2(104, 34)
+			UiPixelTheme.apply_pixel_button(l3_btn, "primary", 10, 6)
 			l3_btn.pressed.connect(func() -> void:
 				get_tree().change_scene_to_file("res://scenes/levels/world_1_syntax_shore/level_3.tscn")
 			)
 			btn_box.add_child(l3_btn)
 		else:
+			var lock_row := HBoxContainer.new()
+			lock_row.add_theme_constant_override("separation", 6)
+			lock_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			ih.add_child(lock_row)
+
+			if ResourceLoader.exists("res://assets/ui/ui_lock_feature_24.png"):
+				var lock_icon := TextureRect.new()
+				lock_icon.texture = load("res://assets/ui/ui_lock_feature_24.png")
+				lock_icon.custom_minimum_size = Vector2(20, 20)
+				lock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				lock_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+				lock_row.add_child(lock_icon)
+
 			var lock_lbl := Label.new()
-			lock_lbl.text = "🔒 Terkunci"
+			lock_lbl.text = "Terkunci"
 			if _font_regular:
 				lock_lbl.add_theme_font_override("font", _font_regular)
 			lock_lbl.add_theme_font_size_override("font_size", 12)
 			lock_lbl.add_theme_color_override("font_color", Color(0.5, 0.55, 0.65))
-			ih.add_child(lock_lbl)
+			lock_row.add_child(lock_lbl)
 
 		vbox.add_child(item)
 
 
 func _build_bug_log_modal() -> void:
-	_bug_log_modal = _create_base_modal("BUG LOG — KATALOG ENSIKLOPEDIA CODEVERSE", Vector2(760, 480))
+	var header_icon := UiPixelTheme.load_atlas(UiPixelTheme.TEX_TOOLS_24, Rect2(6 * 24, 0, 24, 24))
+	_bug_log_modal = _create_base_modal("BUG LOG — KATALOG ENSIKLOPEDIA CODEVERSE", Vector2(760, 480), header_icon)
 	add_child(_bug_log_modal)
 
 	var vbox: VBoxContainer = _bug_log_modal.get_node("OuterVBox/ContentScroll/VBox")
@@ -1137,74 +1166,33 @@ func _build_bug_log_modal() -> void:
 	for e in entries:
 		var bug_id: String = str(e["id"])
 		var is_unlocked: bool = sm.call("is_bug_log_unlocked", bug_id) if sm else true
+		vbox.add_child(UiPixelTheme.build_bug_card(e, is_unlocked, _font_bold, _font_regular, _font_semibold))
 
-		var card := PanelContainer.new()
-		var c_style := StyleBoxFlat.new()
-		c_style.bg_color = Color(0.1, 0.13, 0.19, 0.95) if is_unlocked else Color(0.06, 0.075, 0.11, 0.85)
-		c_style.border_color = COLOR_AMBER if is_unlocked else Color(0.22, 0.26, 0.34, 0.7)
-		c_style.set_border_width_all(1)
-		c_style.set_corner_radius_all(6)
-		c_style.content_margin_left = 14
-		c_style.content_margin_right = 14
-		c_style.content_margin_top = 10
-		c_style.content_margin_bottom = 10
-		card.add_theme_stylebox_override("panel", c_style)
 
-		var cv := VBoxContainer.new()
-		cv.add_theme_constant_override("separation", 4)
-		card.add_child(cv)
-
-		var h := Label.new()
-		h.text = "[%s] %s" % [bug_id, str(e["name"]) if is_unlocked else (str(e["name"]) + " (🔒 Terkunci)")]
-		if _font_bold:
-			h.add_theme_font_override("font", _font_bold)
-		h.add_theme_font_size_override("font_size", 13)
-		h.add_theme_color_override("font_color", COLOR_AMBER if is_unlocked else Color(0.55, 0.6, 0.7))
-		cv.add_child(h)
-
-		var w_lbl := Label.new()
-		w_lbl.text = "Lokasi: %s" % str(e["world"]) if is_unlocked else ("Syarat Terbuka: " + str(e.get("unlock", "Selesaikan level")))
-		if _font_semibold:
-			w_lbl.add_theme_font_override("font", _font_semibold)
-		w_lbl.add_theme_font_size_override("font_size", 11)
-		w_lbl.add_theme_color_override("font_color", COLOR_CYAN if is_unlocked else Color(0.5, 0.56, 0.66))
-		cv.add_child(w_lbl)
-
-		if is_unlocked:
-			var code_lbl := Label.new()
-			code_lbl.text = "Salah : %s\nBenar : %s" % [str(e["sample_bad"]), str(e["sample_good"])]
-			if _font_regular:
-				code_lbl.add_theme_font_override("font", _font_regular)
-			code_lbl.add_theme_font_size_override("font_size", 12)
-			code_lbl.add_theme_color_override("font_color", COLOR_GREEN)
-			cv.add_child(code_lbl)
-
-			var d_lbl := Label.new()
-			d_lbl.text = "Penjelasan: " + str(e["desc"])
-			if _font_regular:
-				d_lbl.add_theme_font_override("font", _font_regular)
-			d_lbl.add_theme_font_size_override("font_size", 11)
-			d_lbl.add_theme_color_override("font_color", Color(0.82, 0.88, 0.95))
-			d_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			cv.add_child(d_lbl)
-
-		vbox.add_child(card)
+func _make_settings_section_header(icon_col: int, title_text: String, color: Color) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var icon_tex := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SETTINGS_ICONS, Rect2(icon_col * 16, 0, 16, 16))
+	row.add_child(UiPixelTheme.make_icon_rect(icon_tex, Vector2(18, 18)))
+	var lbl := Label.new()
+	lbl.text = title_text
+	if _font_bold:
+		lbl.add_theme_font_override("font", _font_bold)
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", color)
+	row.add_child(lbl)
+	return row
 
 
 func _build_settings_modal() -> void:
-	_settings_modal = _create_base_modal("PENGATURAN GAME & KONTROL", Vector2(740, 480))
+	var header_icon := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SETTINGS_ICONS, Rect2(16, 0, 16, 16))
+	_settings_modal = _create_base_modal("PENGATURAN GAME & KONTROL", Vector2(740, 480), header_icon)
 	add_child(_settings_modal)
 
 	var vbox: VBoxContainer = _settings_modal.get_node("OuterVBox/ContentScroll/VBox")
 
 	# Section 1: Audio
-	var a_header := Label.new()
-	a_header.text = "🔊 AUDIO & SUARA"
-	if _font_bold:
-		a_header.add_theme_font_override("font", _font_bold)
-	a_header.add_theme_font_size_override("font_size", 14)
-	a_header.add_theme_color_override("font_color", COLOR_CYAN)
-	vbox.add_child(a_header)
+	vbox.add_child(_make_settings_section_header(0, "AUDIO & SUARA", COLOR_CYAN))
 
 	var a_panel := _create_sub_box()
 	vbox.add_child(a_panel)
@@ -1217,13 +1205,7 @@ func _build_settings_modal() -> void:
 	a_vbox.add_child(_create_slider_row("Efek Suara (SFX)", int(_user_settings.get("sfx_vol", 85)), "SFX", "sfx_vol"))
 
 	# Section 2: Display
-	var d_header := Label.new()
-	d_header.text = "🖥️ TAMPILAN & LAYAR"
-	if _font_bold:
-		d_header.add_theme_font_override("font", _font_bold)
-	d_header.add_theme_font_size_override("font_size", 14)
-	d_header.add_theme_color_override("font_color", COLOR_GREEN)
-	vbox.add_child(d_header)
+	vbox.add_child(_make_settings_section_header(1, "TAMPILAN & LAYAR", COLOR_GREEN))
 
 	var d_panel := _create_sub_box()
 	vbox.add_child(d_panel)
@@ -1232,7 +1214,16 @@ func _build_settings_modal() -> void:
 
 	var fs_check := CheckButton.new()
 	fs_check.text = "Layar Penuh (Fullscreen Mode)"
+	fs_check.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	fs_check.button_pressed = (DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
+	var chk_on := UiPixelTheme.load_atlas(UiPixelTheme.TEX_TOGGLE_SWITCH, Rect2(32, 0, 32, 16))
+	var chk_off := UiPixelTheme.load_atlas(UiPixelTheme.TEX_TOGGLE_SWITCH, Rect2(0, 0, 32, 16))
+	if chk_on:
+		fs_check.add_theme_icon_override("checked", chk_on)
+		fs_check.add_theme_icon_override("checked_disabled", chk_on)
+	if chk_off:
+		fs_check.add_theme_icon_override("unchecked", chk_off)
+		fs_check.add_theme_icon_override("unchecked_disabled", chk_off)
 	if _font_semibold:
 		fs_check.add_theme_font_override("font", _font_semibold)
 	fs_check.add_theme_font_size_override("font_size", 12)
@@ -1247,32 +1238,44 @@ func _build_settings_modal() -> void:
 	d_hbox.add_child(fs_check)
 
 	# Section 3: Cheatsheet Kontrol
-	var c_header := Label.new()
-	c_header.text = "🎮 PANDUAN KONTROL KEYBOARD"
-	if _font_bold:
-		c_header.add_theme_font_override("font", _font_bold)
-	c_header.add_theme_font_size_override("font_size", 14)
-	c_header.add_theme_color_override("font_color", COLOR_AMBER)
-	vbox.add_child(c_header)
+	vbox.add_child(_make_settings_section_header(2, "PANDUAN KONTROL KEYBOARD", COLOR_AMBER))
 
 	var c_panel := _create_sub_box()
 	vbox.add_child(c_panel)
-	var c_lbl := Label.new()
-	c_lbl.text = "• [A / D] atau [Panah] : Berjalan ke Kiri / Kanan\n• [Spasi]             : Melompat\n• [E]                 : Buka / Interaksi Terminal Kode\n• [Tab]               : Beralih Kamera (Overview Full Map vs Zoom Dex)\n• [L]                 : Buka / Tutup Jurnal Bug Log\n• [Ctrl + Enter]      : Jalankan Kode (Run) di Terminal\n• [Ctrl + R]          : Reset Kode ke template awal\n• [F1]                : Bantuan Petunjuk Bertahap (Hint 1..3)\n• [Esc]               : Tutup Terminal / Jendela Modal"
-	if _font_regular:
-		c_lbl.add_theme_font_override("font", _font_regular)
-	c_lbl.add_theme_font_size_override("font_size", 12)
-	c_lbl.add_theme_color_override("font_color", Color(0.85, 0.9, 0.96))
-	c_panel.add_child(c_lbl)
+	var c_grid := GridContainer.new()
+	c_grid.columns = 2
+	c_grid.add_theme_constant_override("h_separation", 20)
+	c_grid.add_theme_constant_override("v_separation", 8)
+	c_panel.add_child(c_grid)
+
+	var controls_list := [
+		["A / D", "Berjalan ke Kiri / Kanan"],
+		["Spasi", "Melompat"],
+		["E", "Buka / Interaksi Terminal Kode"],
+		["Tab", "Beralih Kamera (Overview vs Dex)"],
+		["L", "Buka / Tutup Jurnal Bug Log"],
+		["Ctrl+Enter", "Jalankan Kode (Run) di Terminal"],
+		["Ctrl+R", "Reset Kode ke template awal"],
+		["F1", "Bantuan Petunjuk (Hint 1..3)"],
+		["Esc", "Tutup Terminal / Jendela Modal"],
+	]
+	for pair in controls_list:
+		var k_row := HBoxContainer.new()
+		k_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		k_row.add_theme_constant_override("separation", 8)
+		k_row.add_child(UiPixelTheme.make_keycap_badge(str(pair[0]), _font_bold))
+		var desc_lbl := Label.new()
+		desc_lbl.text = str(pair[1])
+		desc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if _font_regular:
+			desc_lbl.add_theme_font_override("font", _font_regular)
+		desc_lbl.add_theme_font_size_override("font_size", 11)
+		desc_lbl.add_theme_color_override("font_color", Color(0.85, 0.9, 0.96))
+		k_row.add_child(desc_lbl)
+		c_grid.add_child(k_row)
 
 	# Section 4: Data & Progres Reward
-	var p_header := Label.new()
-	p_header.text = "💾 PROGRES & DATA SIMPAN"
-	if _font_bold:
-		p_header.add_theme_font_override("font", _font_bold)
-	p_header.add_theme_font_size_override("font_size", 14)
-	p_header.add_theme_color_override("font_color", Color(0.97, 0.45, 0.45))
-	vbox.add_child(p_header)
+	vbox.add_child(_make_settings_section_header(3, "PROGRES & DATA SIMPAN", Color(0.97, 0.45, 0.45)))
 
 	var p_panel := _create_sub_box()
 	vbox.add_child(p_panel)
@@ -1294,10 +1297,11 @@ func _build_settings_modal() -> void:
 	p_vbox.add_child(p_row)
 
 	var reset_btn := Button.new()
-	reset_btn.text = "↺ Reset Progres Reward"
+	reset_btn.text = "Reset Progres Reward"
 	reset_btn.custom_minimum_size = Vector2(200, 32)
 	if _font_semibold:
 		reset_btn.add_theme_font_override("font", _font_semibold)
+	UiPixelTheme.apply_pixel_button(reset_btn, "danger", 12, 6)
 	p_row.add_child(reset_btn)
 
 	var confirm_row := HBoxContainer.new()
@@ -1316,11 +1320,17 @@ func _build_settings_modal() -> void:
 	var yes_btn := Button.new()
 	yes_btn.text = "Ya, Reset"
 	yes_btn.custom_minimum_size = Vector2(90, 30)
+	if _font_semibold:
+		yes_btn.add_theme_font_override("font", _font_semibold)
+	UiPixelTheme.apply_pixel_button(yes_btn, "danger", 10, 6)
 	confirm_row.add_child(yes_btn)
 
 	var no_btn := Button.new()
 	no_btn.text = "Batal"
 	no_btn.custom_minimum_size = Vector2(72, 30)
+	if _font_semibold:
+		no_btn.add_theme_font_override("font", _font_semibold)
+	UiPixelTheme.apply_pixel_button(no_btn, "secondary", 10, 6)
 	confirm_row.add_child(no_btn)
 
 	var done_lbl := Label.new()
@@ -1407,6 +1417,22 @@ func _create_slider_row(label_text: String, default_val: int, bus_name: String =
 	slider.value = default_val
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.custom_minimum_size = Vector2(240, 24)
+	slider.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var track_bg := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SLIDER_TRACK, Rect2(0, 0, 24, 16))
+	var track_fill := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SLIDER_TRACK, Rect2(24, 0, 24, 16))
+	if track_bg:
+		slider.add_theme_stylebox_override("slider", UiPixelTheme.make_9slice(track_bg, 6, 4, 4))
+	if track_fill:
+		var fill_sb := UiPixelTheme.make_9slice(track_fill, 6, 4, 4)
+		slider.add_theme_stylebox_override("grabber_area", fill_sb)
+		slider.add_theme_stylebox_override("grabber_area_highlight", fill_sb)
+	var grab_norm := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SLIDER_GRABBER, Rect2(0, 0, 16, 16))
+	var grab_hl := UiPixelTheme.load_atlas(UiPixelTheme.TEX_SLIDER_GRABBER, Rect2(16, 0, 16, 16))
+	if grab_norm:
+		slider.add_theme_icon_override("grabber", grab_norm)
+		slider.add_theme_icon_override("grabber_disabled", grab_norm)
+	if grab_hl:
+		slider.add_theme_icon_override("grabber_highlight", grab_hl)
 	row.add_child(slider)
 
 	var val_lbl := Label.new()
@@ -1430,39 +1456,22 @@ func _create_slider_row(label_text: String, default_val: int, bus_name: String =
 
 func _create_sub_box() -> PanelContainer:
 	var pc := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.1, 0.15, 0.9)
-	style.border_color = COLOR_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
-	style.content_margin_left = 12
-	style.content_margin_right = 12
-	style.content_margin_top = 8
-	style.content_margin_bottom = 8
-	pc.add_theme_stylebox_override("panel", style)
+	pc.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pc.add_theme_stylebox_override("panel", UiPixelTheme.make_card_style(0, 12, 8))
 	return pc
 
 
-func _create_base_modal(title_text: String, size_vec: Vector2) -> PanelContainer:
+func _create_base_modal(title_text: String, size_vec: Vector2, header_icon_tex: Texture2D = null) -> PanelContainer:
 	var modal := PanelContainer.new()
 	modal.visible = false
+	modal.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	modal.set_anchors_preset(Control.PRESET_CENTER)
 	modal.custom_minimum_size = size_vec
 	modal.offset_left = -size_vec.x * 0.5
 	modal.offset_top = -size_vec.y * 0.5
 	modal.offset_right = size_vec.x * 0.5
 	modal.offset_bottom = size_vec.y * 0.5
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.065, 0.085, 0.13, 0.98)
-	style.border_color = COLOR_CYAN
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 14
-	style.content_margin_bottom = 14
-	modal.add_theme_stylebox_override("panel", style)
+	modal.add_theme_stylebox_override("panel", UiPixelTheme.make_modal_style())
 
 	var outer := VBoxContainer.new()
 	outer.name = "OuterVBox"
@@ -1470,7 +1479,11 @@ func _create_base_modal(title_text: String, size_vec: Vector2) -> PanelContainer
 	modal.add_child(outer)
 
 	var h_bar := HBoxContainer.new()
+	h_bar.add_theme_constant_override("separation", 8)
 	outer.add_child(h_bar)
+
+	if header_icon_tex != null:
+		h_bar.add_child(UiPixelTheme.make_icon_rect(header_icon_tex, Vector2(20, 20)))
 
 	var t_lbl := Label.new()
 	t_lbl.text = title_text
@@ -1481,11 +1494,7 @@ func _create_base_modal(title_text: String, size_vec: Vector2) -> PanelContainer
 	t_lbl.add_theme_color_override("font_color", COLOR_CYAN)
 	h_bar.add_child(t_lbl)
 
-	var c_btn := Button.new()
-	c_btn.name = "CloseButton"
-	c_btn.text = "✕ Tutup [Esc]"
-	if _font_semibold:
-		c_btn.add_theme_font_override("font", _font_semibold)
+	var c_btn := UiPixelTheme.make_close_button()
 	c_btn.pressed.connect(_close_all_modals)
 	h_bar.add_child(c_btn)
 

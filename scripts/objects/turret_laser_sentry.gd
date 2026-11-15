@@ -166,12 +166,14 @@ func _update_laser() -> void:
 
 	_laser_line.visible = true
 	var hit_dist: float = max_laser_length
+	var hitting_player := false
 
 	if not Engine.is_editor_hint() and is_instance_valid(_raycast) and _raycast.is_colliding():
 		var col_pt := _raycast.get_collision_point()
 		hit_dist = _raycast.global_position.distance_to(col_pt)
 		var collider := _raycast.get_collider()
 		if is_instance_valid(collider) and (collider is CharacterBody2D or collider.name.to_lower().contains("dex")):
+			hitting_player = true
 			if _laser_line.default_color != COLOR_RED_LASER:
 				_laser_line.default_color = COLOR_RED_LASER
 				if is_instance_valid(_head_sprite):
@@ -180,11 +182,11 @@ func _update_laser() -> void:
 			if _damage_timer <= 0.0 and collider.has_method("take_damage"):
 				collider.take_damage(laser_damage, "laser_sentry")
 				_damage_timer = damage_cooldown
-		else:
-			if _laser_line.default_color != COLOR_CYAN_LASER:
-				_laser_line.default_color = COLOR_CYAN_LASER
-				if is_instance_valid(_head_sprite):
-					_head_sprite.texture = load(HEAD_CYAN_PATH)
+
+	if not hitting_player and _laser_line.default_color != COLOR_CYAN_LASER:
+		_laser_line.default_color = COLOR_CYAN_LASER
+		if is_instance_valid(_head_sprite):
+			_head_sprite.texture = load(HEAD_CYAN_PATH)
 
 	_laser_line.set_point_position(0, Vector2(24, 0))
 	_laser_line.set_point_position(1, Vector2(24 + hit_dist, 0))
