@@ -111,7 +111,7 @@ func _build_visuals() -> void:
 		add_child(_shield_dome)
 
 	_status_lbl = Label.new()
-	_status_lbl.position = Vector2(-95.0, -54.0)
+	_status_lbl.position = Vector2(-95.0, -64.0 if enemy_type == 2 else -56.0)
 	_status_lbl.custom_minimum_size = Vector2(190.0, 14.0)
 	_status_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_lbl.add_theme_font_size_override("font_size", 9)
@@ -119,7 +119,7 @@ func _build_visuals() -> void:
 	add_child(_status_lbl)
 
 	_hp_lbl = Label.new()
-	_hp_lbl.position = Vector2(-50.0, -40.0)
+	_hp_lbl.position = Vector2(-50.0, -50.0 if enemy_type == 2 else -42.0)
 	_hp_lbl.custom_minimum_size = Vector2(100.0, 14.0)
 	_hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hp_lbl.add_theme_font_size_override("font_size", 10)
@@ -187,19 +187,24 @@ func _physics_process(delta: float) -> void:
 			if _lunge_telegraph > 0.0:
 				_lunge_telegraph -= delta
 				velocity = to_player.normalized() * (move_speed * 2.1 if _lunge_telegraph <= 0.1 else 15.0)
+				if _sprite and _lunge_telegraph > 0.1:
+					_sprite.modulate = Color(1.5, 0.45, 0.45)
 			else:
+				if _sprite:
+					_sprite.modulate = Color.WHITE
 				velocity = to_player.normalized() * move_speed
 		elif enemy_type == 1:
-			# PatrolDrone hovers and fires energy pulse every 2.2s
-			velocity = to_player.normalized() * (move_speed * 0.65 if dist_to_player > 52.0 else 0.0)
+			# PatrolDrone hovers and fires dodgeable energy orb (120 px/s) every 2.2s
+			velocity = to_player.normalized() * (move_speed * 0.65 if dist_to_player > 58.0 else 0.0)
 			_attack_cd -= delta
-			if _attack_cd <= 0.0 and dist_to_player <= 110.0:
+			if _attack_cd <= 0.0 and dist_to_player <= 125.0:
 				_attack_cd = 2.2
-				if player.has_method("take_damage"):
-					player.call("take_damage", contact_damage, global_position)
+				_spawn_energy_orb(to_player.normalized(), 120.0, contact_damage)
 		else:
 			velocity = to_player.normalized() * move_speed
 	else:
+		if _sprite:
+			_sprite.modulate = Color.WHITE
 		# Simple patrol around origin
 		var target := _patrol_origin + patrol_span * _patrol_dir
 		var diff := target - global_position
@@ -207,15 +212,74 @@ func _physics_process(delta: float) -> void:
 			_patrol_dir *= -1.0
 		velocity = diff.normalized() * (move_speed * 0.65)
 
+	# Soft separation steering so enemies do not stack on the exact same pixel
+	var sep := Vector2.ZERO
+	for other in get_tree().get_nodes_in_group("w2_enemies"):
+		if other == self or not (other is Node2D):
+			continue
+		var d_vec := global_position - (other as Node2D).global_position
+		var d_len := d_vec.length()
+		if d_len > 0.01 and d_len < 30.0:
+			sep += d_vec.normalized() * ((30.0 - d_len) / 30.0) * 85.0
+	velocity += sep
+
 	if _attack_cd > 0.0 and enemy_type != 1:
 		_attack_cd = maxf(0.0, _attack_cd - delta)
 
 	move_and_slide()
+	global_position.x = clampf(global_position.x, 24.0, 1896.0)
+	global_position.y = clampf(global_position.y, 24.0, 1256.0)
 
-	if player and dist_to_player < 20.0 and player.has_method("take_damage"):
+	if player and dist_to_player < 20.0 and _lunge_telegraph <= 0.1 and player.has_method("take_damage"):
 		player.call("take_damage", contact_damage, global_position)
 
 	_update_visual_frame(is_chasing)
+
+
+func _spawn_energy_orb(dir: Vector2, speed_px: float, dmg: float) -> void:
+	var parent_node := get_parent()
+	if not parent_node:
+		return
+	var orb := Area2D.new()
+	orb.name = "DroneOrb"
+	orb.global_position = global_position + dir * 12.0
+	orb.z_index = 3
+	var col := CollisionShape2D.new()
+	var c_shape := CircleShape2D.new()
+	c_shape.radius = 5.0
+	col.shape = c_shape
+	orb.add_child(col)
+
+	var orb_rect := ColorRect.new()
+	orb_rect.size = Vector2(8, 8)
+	orb_rect.position = Vector2(-4, -4)
+	orb_rect.color = Color("#f43f5e")
+	orb.add_child(orb_rect)
+
+	var core_rect := ColorRect.new()
+	core_rect.size = Vector2(4, 4)
+	core_rect.position = Vector2(-2, -2)
+	core_rect.color = Color("#fde047")
+	orb.add_child(core_rect)
+
+	parent_node.add_child(orb)
+	var target_pos := orb.global_position + dir * (speed_px * 1.8)
+	var hit_state := {"done": false}
+	orb.body_entered.connect(func(b: Node2D) -> void:
+		if hit_state["done"]:
+			return
+		if b and b.is_in_group("player"):
+			hit_state["done"] = true
+			if b.has_method("take_damage"):
+				b.call("take_damage", dmg, orb.global_position)
+			orb.queue_free()
+	)
+	var tw := orb.create_tween()
+	tw.tween_property(orb, "global_position", target_pos, 1.8)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(orb):
+			orb.queue_free()
+	)
 
 
 func _update_visual_frame(is_chasing: bool) -> void:
@@ -231,7 +295,7 @@ func _update_visual_frame(is_chasing: bool) -> void:
 		var row := 1 if is_chasing else 0
 		_sprite.frame = row * 4 + step
 	elif enemy_type == 2:
-		var row := 1 if shield_active else 2
+		var row := 2 if not shield_active else (1 if is_chasing else 0)
 		_sprite.frame = row * 4 + step
 
 

@@ -352,7 +352,7 @@ func _build_ui() -> void:
 	root_vbox.add_child(footer_row)
 
 	var ver_lbl := Label.new()
-	ver_lbl.text = "BUILD v1.1 • SYNTAX SHORE"
+	ver_lbl.text = "BUILD v2.0 • CONDITION CANYON"
 	ver_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _font_regular:
 		ver_lbl.add_theme_font_override("font", _font_regular)
@@ -1061,8 +1061,8 @@ func _build_level_select_modal() -> void:
 			var sm: Node = get_node_or_null("/root/SaveManager")
 			var w2_done: bool = sm and sm.call("is_level_completed", "world_2_city")
 			var btn_box := HBoxContainer.new()
-			btn_box.add_theme_constant_override("separation", 6)
-			ih.add_child(btn_box)
+			btn_box.add_theme_constant_override("separation", 8)
+			iv.add_child(btn_box)
 
 			var acts := [
 				{"act": 1, "label": "Act 1: Scrap Haven", "sandbox": false},
@@ -1078,8 +1078,8 @@ func _build_level_select_modal() -> void:
 				if _font_semibold:
 					abtn.add_theme_font_override("font", _font_semibold)
 				abtn.add_theme_font_size_override("font_size", 11)
-				abtn.custom_minimum_size = Vector2(126, 34)
-				UiPixelTheme.apply_pixel_button(abtn, "primary", 8, 6)
+				abtn.custom_minimum_size = Vector2(180, 32)
+				UiPixelTheme.apply_pixel_button(abtn, "primary", 10, 6)
 				var act_num := int(act_cfg["act"])
 				var use_sb := bool(act_cfg["sandbox"])
 				abtn.pressed.connect(func() -> void:

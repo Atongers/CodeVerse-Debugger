@@ -332,8 +332,8 @@ func _build_districts_and_entities() -> void:
 		"Terminal_1": Vector2(500, 540),
 		"Terminal_2": Vector2(640, 180),
 		"Terminal_3": Vector2(1450, 620),
-		"Terminal_4A": Vector2(1670, 520),
-		"Terminal_4B": Vector2(1670, 680),
+		"Terminal_4A": Vector2(1655, 535),
+		"Terminal_4B": Vector2(1655, 690),
 	}
 	for tid in term_positions.keys():
 		var t_area := _create_w2_terminal_node(str(tid), term_positions[tid] as Vector2)
@@ -393,7 +393,7 @@ func _build_districts_and_entities() -> void:
 
 	boss_ai = BossGatekeeperAI.new()
 	boss_ai.name = "BossGatekeeperAI"
-	boss_ai.position = Vector2(1760, 590)
+	boss_ai.position = Vector2(1790, 595)
 	boss_ai.subnode_unlocked.connect(_refresh_world_state)
 	boss_ai.boss_restored.connect(_on_boss_restored)
 	add_child(boss_ai)
@@ -961,7 +961,7 @@ func _on_dex_emp_fired(origin: Vector2, radius: float, damage: float, stun_durat
 		boss_ai.on_emp_hit(origin, radius)
 
 
-func _on_enemy_defeated(_enemy: EnemyTopDown, e_type: int, _drop_pos: Vector2) -> void:
+func _on_enemy_defeated(enemy: EnemyTopDown, e_type: int, _drop_pos: Vector2) -> void:
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if not sm:
 		return
@@ -969,9 +969,12 @@ func _on_enemy_defeated(_enemy: EnemyTopDown, e_type: int, _drop_pos: Vector2) -
 	match e_type:
 		0: # ScrapHound
 			sm.call("add_scrap_bits", 15 + bonus_bits)
-			sm.call("add_item", "coolant_cell", 1)
+			var drop_coolant: bool = (enemy != null and enemy.guaranteed_coolant) or (randf() < 0.65)
+			if drop_coolant:
+				sm.call("add_item", "coolant_cell", 1)
 			sm.call("add_item", "scrap_metal", 1)
-			_show_toast("Loot Scrap Hound: +%d Bits, +1 Coolant Cell, +1 Scrap Metal" % (15 + bonus_bits))
+			var c_msg := ", +1 Coolant Cell" if drop_coolant else ""
+			_show_toast("Loot Scrap Hound: +%d Bits%s, +1 Scrap Metal" % [15 + bonus_bits, c_msg])
 		1: # PatrolDrone
 			sm.call("add_scrap_bits", 20 + bonus_bits)
 			sm.call("add_item", "copper_wire", 1)
@@ -1023,6 +1026,13 @@ func _on_dex_interact_requested() -> void:
 
 
 func _try_open_w2_terminal(term_id: String) -> void:
+	if term_id == "Terminal_3":
+		var sentinel_alive := get_node_or_null("Enemies/ShieldSentinel_1") != null
+		var sm: Node = get_node_or_null("/root/SaveManager")
+		var sentinel_done := sm != null and sm.has_method("get_quest_flag") and bool(sm.call("get_quest_flag", "sentinel_defeated", false))
+		if sentinel_alive and not sentinel_done:
+			_show_toast("Terminal 3 dijaga Shield Sentinel! Rakit Shield-Breaker EMP Coil di Workbench lalu kalahkan Sentinel!")
+			return
 	if term_id == "Terminal_4A" and boss_ai and boss_ai.phase == 0 and not boss_ai.subnode_ready:
 		_show_toast("Sub-Node terkunci perisai merah! Tembakkan EMP Pulse [F / Spasi] ke Boss terlebih dahulu!")
 		return

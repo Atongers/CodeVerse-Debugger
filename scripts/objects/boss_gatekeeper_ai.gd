@@ -98,20 +98,68 @@ func _refresh_visuals() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	_anim_clock += delta
 	if _sprite:
 		var step := int(_anim_clock * 5.0) % 4
 		_sprite.frame = clampi(phase, 0, 2) * 4 + step
 
-	if phase < 2:
+	# Only phase 0 (Corrupted) fires dodgeable plasma sweep orbs
+	if phase == 0:
 		_pulse_timer -= delta
 		if _pulse_timer <= 0.0:
 			_pulse_timer = 3.0
 			var player: Node2D = get_tree().get_first_node_in_group("player") as Node2D
-			if player and player.global_position.distance_to(global_position) < 110.0:
+			if player and player.global_position.distance_to(global_position) < 150.0:
 				if player.has_method("is_input_locked") and not bool(player.call("is_input_locked")):
-					if player.has_method("take_damage"):
-						player.call("take_damage", 12.0, global_position)
+					_fire_boss_laser_orb((player.global_position - global_position).normalized())
+
+
+func _fire_boss_laser_orb(dir: Vector2) -> void:
+	var parent_node := get_parent()
+	if not parent_node:
+		return
+	var orb := Area2D.new()
+	orb.name = "BossLaserOrb"
+	orb.global_position = global_position + dir * 24.0
+	orb.z_index = 3
+	var col := CollisionShape2D.new()
+	var c_shape := CircleShape2D.new()
+	c_shape.radius = 7.0
+	col.shape = c_shape
+	orb.add_child(col)
+
+	var outer_r := ColorRect.new()
+	outer_r.size = Vector2(12, 12)
+	outer_r.position = Vector2(-6, -6)
+	outer_r.color = Color("#f43f5e")
+	orb.add_child(outer_r)
+
+	var inner_r := ColorRect.new()
+	inner_r.size = Vector2(6, 6)
+	inner_r.position = Vector2(-3, -3)
+	inner_r.color = Color("#fef08a")
+	orb.add_child(inner_r)
+
+	parent_node.add_child(orb)
+	var target_pos := orb.global_position + dir * 230.0
+	var hit_state := {"done": false}
+	orb.body_entered.connect(func(b: Node2D) -> void:
+		if hit_state["done"]:
+			return
+		if b and b.is_in_group("player"):
+			hit_state["done"] = true
+			if b.has_method("take_damage"):
+				b.call("take_damage", 12.0, orb.global_position)
+			orb.queue_free()
+	)
+	var tw := orb.create_tween()
+	tw.tween_property(orb, "global_position", target_pos, 1.7)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(orb):
+			orb.queue_free()
+	)
 
 
 func on_emp_hit(origin: Vector2, radius: float) -> void:
