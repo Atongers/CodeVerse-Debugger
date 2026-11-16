@@ -23,6 +23,31 @@ const TEX_TOOLS_24 := "res://assets/ui/ui_tools_24_sheet.png"
 const TEX_WORLD_BADGES := "res://assets/ui/ui_world_badges_sheet.png"
 const TEX_LOCK_FEATURE := "res://assets/ui/ui_lock_feature_24.png"
 
+const TEX_W2_CUTSCENE_SLIDES := "res://assets/world_2/story/story_w2_cutscene_slides.png"
+const TEX_W2_LINT_PORTRAIT := "res://assets/world_2/story/story_lint_portrait_48.png"
+const TEX_W2_DEX_DEFAULT := "res://assets/world_2/characters/dex_topdown_default.png"
+const TEX_W2_DEX_VOLT := "res://assets/world_2/characters/dex_topdown_volt_scout.png"
+const TEX_W2_DEX_PLASMA := "res://assets/world_2/characters/dex_topdown_plasma_sentinel.png"
+const TEX_W2_TILESET := "res://assets/world_2/environment/world2_canyon_tileset.png"
+const TEX_W2_BUILDINGS := "res://assets/world_2/environment/world2_buildings_props_sheet.png"
+const TEX_W2_OBJECTS := "res://assets/world_2/objects/world2_condition_objects_sheet.png"
+const TEX_W2_ATMOSPHERE := "res://assets/world_2/environment/world2_atmosphere_fx_sheet.png"
+const TEX_W2_NPCS := "res://assets/world_2/characters/npc_canyon_robots_sheet.png"
+const TEX_W2_NPC_PORTRAITS := "res://assets/world_2/ui/npc_canyon_portraits_48.png"
+const TEX_W2_DIALOG_KIT := "res://assets/world_2/ui/ui_dialog_rpg_kit.png"
+const TEX_W2_QUEST_EMOTES := "res://assets/world_2/ui/ui_quest_emotes_16.png"
+const TEX_W2_ENEMY_HOUND := "res://assets/world_2/characters/enemy_scrap_hound_sheet.png"
+const TEX_W2_ENEMY_DRONE := "res://assets/world_2/characters/enemy_patrol_drone_sheet.png"
+const TEX_W2_ENEMY_SENTINEL := "res://assets/world_2/characters/enemy_shield_sentinel_sheet.png"
+const TEX_W2_VFX_COMBAT := "res://assets/world_2/vfx/vfx_combat_and_shield_32.png"
+const TEX_W2_WORKBENCH := "res://assets/world_2/objects/world2_workbench_station_sheet.png"
+const TEX_W2_ITEMS_16 := "res://assets/world_2/items/world2_crafting_items_16_sheet.png"
+const TEX_W2_SCRAP_COIN := "res://assets/world_2/ui/ui_scrap_bit_coin_16.png"
+const TEX_W2_UPGRADE_ICONS := "res://assets/world_2/ui/ui_upgrade_tree_nodes_32.png"
+const TEX_W2_TREE_FRAME := "res://assets/world_2/ui/ui_tree_node_frame_sheet.png"
+const TEX_W2_BOSS_AI := "res://assets/world_2/characters/boss_gatekeeper_ai_sheet.png"
+const TEX_W2_ACHIEVEMENTS := "res://assets/world_2/ui/ui_achievement_badges_24_sheet.png"
+
 
 static func make_atlas(tex: Texture2D, rect: Rect2) -> AtlasTexture:
 	if not tex:
@@ -117,14 +142,14 @@ static func make_close_button() -> TextureButton:
 
 
 static func make_icon_rect(tex: Texture2D, min_size: Vector2 = Vector2(16, 16)) -> TextureRect:
-	var tr := TextureRect.new()
-	tr.texture = tex
-	tr.custom_minimum_size = min_size
-	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return tr
+	var icon_rect := TextureRect.new()
+	icon_rect.texture = tex
+	icon_rect.custom_minimum_size = min_size
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return icon_rect
 
 
 static func make_keycap_badge(key_text: String, font_bold: Font = null) -> PanelContainer:
@@ -305,3 +330,35 @@ static func build_bug_card(entry: Dictionary, is_unlocked: bool, font_bold: Font
 			cv.add_child(d_lbl)
 
 	return card
+
+
+static func make_rpg_dialog_style(pad_h: int = 14, pad_v: int = 10) -> StyleBoxTexture:
+	var tex := load_atlas(TEX_W2_DIALOG_KIT, Rect2(0, 0, 48, 48))
+	if not tex:
+		return make_modal_style()
+	return make_9slice(tex, 8, pad_h, pad_v)
+
+
+static func make_rpg_portrait_frame_style() -> StyleBoxTexture:
+	var tex := load_atlas(TEX_W2_DIALOG_KIT, Rect2(52, 2, 32, 32))
+	if not tex:
+		return make_card_style(0, 4, 4)
+	return make_9slice(tex, 4, 4, 4)
+
+
+static func get_w2_item_icon(col_idx: int, is_unlocked: bool = true) -> AtlasTexture:
+	var row: int = 0 if is_unlocked else 1
+	return load_atlas(TEX_W2_ITEMS_16, Rect2(clampi(col_idx, 0, 11) * 16, row * 16, 16, 16))
+
+
+static func get_achievement_icon(col_idx: int, is_unlocked: bool = true) -> AtlasTexture:
+	var row: int = 0 if is_unlocked else 1
+	return load_atlas(TEX_W2_ACHIEVEMENTS, Rect2(clampi(col_idx, 0, 11) * 24, row * 24, 24, 24))
+
+
+static func make_tree_node_style(state_col: int = 0) -> StyleBoxTexture:
+	var tex := load_atlas(TEX_W2_TREE_FRAME, Rect2(clampi(state_col, 0, 2) * 48, 0, 48, 48))
+	if not tex:
+		return make_card_style(state_col, 6, 6)
+	return make_9slice(tex, 8, 6, 6)
+

@@ -21,6 +21,13 @@ const KNOWN_FUNCTIONS := [
 	"atur_elevator",
 	"buka_firewall",
 	"buka_exit_level_3",
+	"stabilkan_gerbang_kota",
+	"kalibrasi_pendingin",
+	"set_filter_iff",
+	"aktifkan_jembatan_overpass",
+	"nonaktifkan_perisai_boss",
+	"pulihkan_gatekeeper_ai",
+	"rakit_item",
 ]
 
 
@@ -31,39 +38,159 @@ static func run_script(source_code: String, allowed_calls: Array[String] = []) -
 	var all_outputs: Array[String] = []
 	var all_calls: Array[Dictionary] = []
 
+	var parsed_lines: Array[Dictionary] = []
 	for idx in range(lines.size()):
 		var line_num: int = idx + 1
 		var raw_line: String = lines[idx]
 		var code_line: String = _strip_comment(raw_line).strip_edges()
-
 		if code_line.is_empty():
 			continue
+		var indent_spaces: int = _count_indent_spaces(raw_line)
+		parsed_lines.append({
+			"line": line_num,
+			"raw": raw_line,
+			"code": code_line,
+			"indent": indent_spaces,
+		})
 
-		# Check common syntax errors on this line first
-		var syn_err: String = _check_line_syntax(raw_line, code_line, line_num)
-		if not syn_err.is_empty():
-			var err_step := {
+	# Pre-check syntax and indentation structure across lines
+	for p_idx in range(parsed_lines.size()):
+		var item: Dictionary = parsed_lines[p_idx]
+		var line_num: int = int(item["line"])
+		var raw_line: String = str(item["raw"])
+		var code_line: String = str(item["code"])
+		var indent: int = int(item["indent"])
+
+		# 1. Check basic quote/paren/header syntax first (so missing ':' is caught before indent errors)
+		var syn_info: Dictionary = _check_line_syntax_v2(raw_line, code_line, line_num)
+		if not syn_info.is_empty():
+			return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, str(syn_info["message"]), str(syn_info["type"]))
+
+		# 2. Check indentation validity relative to previous non-empty line
+		if p_idx == 0:
+			if indent > 0:
+				var msg := "IndentationError (Baris %d): Spasi/tab di awal baris tidak diperlukan di sini." % line_num
+				return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "IndentationError")
+		else:
+			var prev_item: Dictionary = parsed_lines[p_idx - 1]
+			var prev_code: String = str(prev_item["code"])
+			var prev_indent: int = int(prev_item["indent"])
+			var prev_is_header: bool = _is_block_header(prev_code)
+
+			if prev_is_header:
+				if indent <= prev_indent:
+					var msg := "IndentationError (Baris %d): Baris di dalam blok 'if/elif/else' harus menjorok ke dalam (gunakan 4 spasi atau Tab)." % line_num
+					return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "IndentationError")
+			else:
+				if indent > prev_indent:
+					var msg := "IndentationError (Baris %d): Spasi/tab di awal baris tidak diperlukan di sini." % line_num
+					return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "IndentationError")
+
+		# 3. If the last line in the script is a block header, it has an empty body
+		if _is_block_header(code_line) and p_idx == parsed_lines.size() - 1:
+			var msg := "IndentationError (Baris %d): Baris di dalam blok 'if/elif/else' harus menjorok ke dalam (gunakan 4 spasi atau Tab)." % line_num
+			return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "IndentationError")
+
+	# Execute with conditional block stack
+	var block_stack: Array[Dictionary] = []
+
+	for p_idx in range(parsed_lines.size()):
+		var item: Dictionary = parsed_lines[p_idx]
+		var line_num: int = int(item["line"])
+		var code_line: String = str(item["code"])
+		var indent: int = int(item["indent"])
+		var kw: String = _get_header_keyword(code_line)
+
+		if kw == "if":
+			while not block_stack.is_empty() and int(block_stack.back()["indent"]) >= indent:
+				block_stack.pop_back()
+			var parent_active: bool = _is_stack_active(block_stack, indent)
+			if not parent_active:
+				block_stack.append({"indent": indent, "branch_taken": true, "active": false})
+				continue
+			var cond_str: String = code_line.substr(2, code_line.length() - 3).strip_edges()
+			var cond_res: Dictionary = _eval_expr(cond_str, line_num, env)
+			if cond_res.has("error"):
+				var err_d: Dictionary = cond_res["error"]
+				return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, str(err_d.get("message", "Terjadi kesalahan.")), str(err_d.get("type", "RuntimeError")))
+			var taken: bool = _to_bool(cond_res["value"])
+			steps.append({
 				"line": line_num,
 				"code": code_line,
 				"env": env.duplicate(true),
 				"outputs": [] as Array[String],
 				"call": {},
-				"error": syn_err,
-				"error_type": "SyntaxError",
-			}
-			steps.append(err_step)
-			return {
-				"ok": false,
-				"steps": steps,
-				"env": env,
-				"outputs": all_outputs,
-				"calls": all_calls,
-				"error": syn_err,
-				"error_type": "SyntaxError",
-				"error_line": line_num,
-			}
+				"error": "",
+				"error_type": "",
+			})
+			block_stack.append({"indent": indent, "branch_taken": taken, "active": taken})
+			continue
 
-		# Execute statement: either function call or assignment
+		elif kw == "elif":
+			while not block_stack.is_empty() and int(block_stack.back()["indent"]) > indent:
+				block_stack.pop_back()
+			if block_stack.is_empty() or int(block_stack.back()["indent"]) != indent:
+				var msg := "SyntaxError (Baris %d): 'elif' harus berada sejajar setelah blok 'if'." % line_num
+				return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "SyntaxError")
+			var parent_active: bool = _is_stack_active(block_stack, indent)
+			var frame: Dictionary = block_stack.back()
+			if not parent_active or bool(frame["branch_taken"]):
+				frame["active"] = false
+				block_stack[block_stack.size() - 1] = frame
+				continue
+			var cond_str: String = code_line.substr(4, code_line.length() - 5).strip_edges()
+			var cond_res: Dictionary = _eval_expr(cond_str, line_num, env)
+			if cond_res.has("error"):
+				var err_d: Dictionary = cond_res["error"]
+				return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, str(err_d.get("message", "Terjadi kesalahan.")), str(err_d.get("type", "RuntimeError")))
+			var taken: bool = _to_bool(cond_res["value"])
+			steps.append({
+				"line": line_num,
+				"code": code_line,
+				"env": env.duplicate(true),
+				"outputs": [] as Array[String],
+				"call": {},
+				"error": "",
+				"error_type": "",
+			})
+			frame["branch_taken"] = taken
+			frame["active"] = taken
+			block_stack[block_stack.size() - 1] = frame
+			continue
+
+		elif kw == "else":
+			while not block_stack.is_empty() and int(block_stack.back()["indent"]) > indent:
+				block_stack.pop_back()
+			if block_stack.is_empty() or int(block_stack.back()["indent"]) != indent:
+				var msg := "SyntaxError (Baris %d): 'else' harus berada sejajar setelah blok 'if' atau 'elif'." % line_num
+				return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, msg, "SyntaxError")
+			var parent_active: bool = _is_stack_active(block_stack, indent)
+			var frame: Dictionary = block_stack.back()
+			if not parent_active or bool(frame["branch_taken"]):
+				frame["active"] = false
+				block_stack[block_stack.size() - 1] = frame
+				continue
+			steps.append({
+				"line": line_num,
+				"code": code_line,
+				"env": env.duplicate(true),
+				"outputs": [] as Array[String],
+				"call": {},
+				"error": "",
+				"error_type": "",
+			})
+			frame["branch_taken"] = true
+			frame["active"] = true
+			block_stack[block_stack.size() - 1] = frame
+			continue
+
+		# Regular statement: pop any block frames at or deeper than current indent
+		while not block_stack.is_empty() and int(block_stack.back()["indent"]) >= indent:
+			block_stack.pop_back()
+
+		if not _is_stack_active(block_stack, indent + 1):
+			continue
+
 		var step_outputs: Array[String] = []
 		var step_call: Dictionary = {}
 		var err_info: Dictionary = _execute_statement(code_line, line_num, env, step_outputs, step_call, allowed_calls)
@@ -71,25 +198,7 @@ static func run_script(source_code: String, allowed_calls: Array[String] = []) -
 		if not err_info.is_empty():
 			var err_msg: String = err_info.get("message", "Terjadi kesalahan.")
 			var err_type: String = err_info.get("type", "RuntimeError")
-			steps.append({
-				"line": line_num,
-				"code": code_line,
-				"env": env.duplicate(true),
-				"outputs": step_outputs,
-				"call": step_call,
-				"error": err_msg,
-				"error_type": err_type,
-			})
-			return {
-				"ok": false,
-				"steps": steps,
-				"env": env,
-				"outputs": all_outputs,
-				"calls": all_calls,
-				"error": err_msg,
-				"error_type": err_type,
-				"error_line": line_num,
-			}
+			return _make_error_result(steps, env, all_outputs, all_calls, line_num, code_line, err_msg, err_type, step_outputs, step_call)
 
 		for o in step_outputs:
 			all_outputs.append(o)
@@ -118,6 +227,83 @@ static func run_script(source_code: String, allowed_calls: Array[String] = []) -
 	}
 
 
+static func _make_error_result(
+	steps: Array[Dictionary],
+	env: Dictionary,
+	all_outputs: Array[String],
+	all_calls: Array[Dictionary],
+	line_num: int,
+	code_line: String,
+	err_msg: String,
+	err_type: String,
+	step_outputs: Array[String] = [],
+	step_call: Dictionary = {}
+) -> Dictionary:
+	steps.append({
+		"line": line_num,
+		"code": code_line,
+		"env": env.duplicate(true),
+		"outputs": step_outputs,
+		"call": step_call,
+		"error": err_msg,
+		"error_type": err_type,
+	})
+	return {
+		"ok": false,
+		"steps": steps,
+		"env": env,
+		"outputs": all_outputs,
+		"calls": all_calls,
+		"error": err_msg,
+		"error_type": err_type,
+		"error_line": line_num,
+	}
+
+
+static func _count_indent_spaces(raw: String) -> int:
+	var count := 0
+	for i in range(raw.length()):
+		var c := raw[i]
+		if c == " ":
+			count += 1
+		elif c == "\t":
+			count += 4
+		else:
+			break
+	return count
+
+
+static func _get_header_keyword(code: String) -> String:
+	if code == "if" or code.begins_with("if ") or code.begins_with("if(") or code.begins_with("if:"):
+		return "if"
+	if code == "elif" or code.begins_with("elif ") or code.begins_with("elif(") or code.begins_with("elif:"):
+		return "elif"
+	if code == "else" or code.begins_with("else:") or code.begins_with("else "):
+		return "else"
+	return ""
+
+
+static func _is_block_header(code: String) -> bool:
+	return not _get_header_keyword(code).is_empty() and code.ends_with(":")
+
+
+static func _is_stack_active(stack: Array[Dictionary], max_indent_exclusive: int) -> bool:
+	for f in stack:
+		if int(f["indent"]) < max_indent_exclusive and not bool(f["active"]):
+			return false
+	return true
+
+
+static func _to_bool(v: Variant) -> bool:
+	if typeof(v) == TYPE_BOOL:
+		return bool(v)
+	if typeof(v) == TYPE_INT or typeof(v) == TYPE_FLOAT:
+		return not is_zero_approx(float(v))
+	if typeof(v) == TYPE_STRING:
+		return not str(v).is_empty()
+	return v != null
+
+
 static func _strip_comment(raw: String) -> String:
 	var in_single := false
 	var in_double := false
@@ -132,17 +318,8 @@ static func _strip_comment(raw: String) -> String:
 	return raw
 
 
-static func _check_line_syntax(raw: String, code: String, line_num: int) -> String:
-	# 1. Indentation check (for World 1 top-level statements)
-	for i in range(raw.length()):
-		var c := raw[i]
-		if c == " " or c == "\t":
-			if not code.is_empty():
-				return "IndentationError (Baris %d): Spasi/tab di awal baris tidak diperlukan di sini." % line_num
-		else:
-			break
-
-	# 2. Unclosed quotes check
+static func _check_line_syntax_v2(raw: String, code: String, line_num: int) -> Dictionary:
+	# 1. Unclosed quotes & parentheses check
 	var in_single := false
 	var in_double := false
 	var paren_depth := 0
@@ -160,17 +337,59 @@ static func _check_line_syntax(raw: String, code: String, line_num: int) -> Stri
 			elif ch == ")":
 				paren_depth -= 1
 				if paren_depth < 0:
-					return "SyntaxError (Baris %d): Tanda kurung tutup ')' berlebih tanpa pasangannya." % line_num
+					return {
+						"type": "SyntaxError",
+						"message": "SyntaxError (Baris %d): Tanda kurung tutup ')' berlebih tanpa pasangannya." % line_num
+					}
 
 	if in_single or in_double:
-		return "SyntaxError (Baris %d): Tanda kutip teks (string) belum ditutup." % line_num
+		return {
+			"type": "SyntaxError",
+			"message": "SyntaxError (Baris %d): Tanda kutip teks (string) belum ditutup." % line_num
+		}
 	if paren_depth != 0:
-		return "SyntaxError (Baris %d): Tanda kurung '(' belum ditutup dengan ')'." % line_num
+		return {
+			"type": "SyntaxError",
+			"message": "SyntaxError (Baris %d): Tanda kurung '(' belum ditutup dengan ')'." % line_num
+		}
 
-	if code.find("==") != -1 and not code.begins_with("print("):
-		return "SyntaxError (Baris %d): Gunakan satu tanda '=' untuk mengisi variabel, bukan '=='." % line_num
+	# 2. Check conditional header syntax (BUG-11 missing ':' & BUG-13 '=' in condition)
+	var kw := _get_header_keyword(code)
+	if not kw.is_empty():
+		if not code.ends_with(":"):
+			return {
+				"type": "SyntaxError",
+				"message": "SyntaxError (Baris %d): Pernyataan '%s' wajib diakhiri tanda titik dua ':'." % [line_num, kw]
+			}
+		if kw == "if" or kw == "elif":
+			var cond_str := code.substr(kw.length(), code.length() - kw.length() - 1).strip_edges()
+			if cond_str.is_empty():
+				return {
+					"type": "SyntaxError",
+					"message": "SyntaxError (Baris %d): Kondisi setelah '%s' tidak boleh kosong." % [line_num, kw]
+				}
+			if _find_top_level_assign(cond_str) != -1:
+				return {
+					"type": "SyntaxError",
+					"message": "SyntaxError (Baris %d): Di dalam kondisi 'if/elif', gunakan dua tanda sama dengan '==' untuk membandingkan nilai, bukan '='." % line_num
+				}
+		elif kw == "else":
+			var after_else := code.substr(4, code.length() - 5).strip_edges()
+			if not after_else.is_empty():
+				return {
+					"type": "SyntaxError",
+					"message": "SyntaxError (Baris %d): Pernyataan 'else:' tidak boleh diikuti kondisi (gunakan 'elif' jika butuh kondisi)." % line_num
+				}
+		return {}
 
-	return ""
+	# 3. For regular statements, catch accidental '==' used as assignment when no '=' is present
+	if code.find("==") != -1 and not code.begins_with("print(") and _find_top_level_assign(code) == -1:
+		return {
+			"type": "SyntaxError",
+			"message": "SyntaxError (Baris %d): Gunakan satu tanda '=' untuk mengisi variabel, bukan '=='." % line_num
+		}
+
+	return {}
 
 
 static func _execute_statement(
@@ -181,7 +400,6 @@ static func _execute_statement(
 	step_call: Dictionary,
 	allowed_calls: Array[String]
 ) -> Dictionary:
-	# Check if this is a function call statement: func_name(args...)
 	var eq_pos := _find_top_level_assign(code)
 	if eq_pos == -1:
 		var paren_open := code.find("(")
@@ -195,7 +413,6 @@ static func _execute_statement(
 				"message": "SyntaxError (Baris %d): Baris '%s' bukan perintah yang valid. Gunakan 'variabel = nilai' atau panggil fungsi seperti 'print(...)'." % [line_num, code]
 			}
 
-	# Assignment statement
 	var lhs := code.substr(0, eq_pos).strip_edges()
 	var rhs := code.substr(eq_pos + 1).strip_edges()
 	var compound_op := ""
@@ -249,7 +466,7 @@ static func _eval_function_call(
 			"message": "SyntaxError (Baris %d): Nama fungsi '%s' tidak valid." % [line_num, fn_name]
 		}
 
-	var all_valid_fns: Array[String] = ["print", "int", "str", "abs"]
+	var all_valid_fns: Array[String] = ["print", "int", "str", "abs", "len"]
 	for ac in allowed_calls:
 		if not all_valid_fns.has(ac):
 			all_valid_fns.append(ac)
@@ -281,7 +498,6 @@ static func _eval_function_call(
 		step_outputs.append(" ".join(out_parts))
 		return {}
 
-	# Level binding function call
 	if args.size() != 1:
 		return {
 			"type": "TypeError",
@@ -299,18 +515,65 @@ static func _eval_expr(expr: String, line_num: int, env: Dictionary) -> Dictiona
 	if s.is_empty():
 		return {"error": {"type": "SyntaxError", "message": "SyntaxError (Baris %d): Ekspresi kosong." % line_num}}
 
-	# Strip outer balanced parentheses
 	while s.begins_with("(") and s.ends_with(")") and _parens_wrap_entire(s):
 		s = s.substr(1, s.length() - 2).strip_edges()
 
-	# 1. Binary addition / subtraction (lowest precedence, right-to-left scan for left-associativity)
+	# 1. Boolean 'or' (lowest precedence)
+	var or_pos := _find_rightmost_keyword_op(s, "or")
+	if or_pos != -1:
+		var left_str := s.substr(0, or_pos).strip_edges()
+		var right_str := s.substr(or_pos + 2).strip_edges()
+		var l_res: Dictionary = _eval_expr(left_str, line_num, env)
+		if l_res.has("error"):
+			return l_res
+		var r_res: Dictionary = _eval_expr(right_str, line_num, env)
+		if r_res.has("error"):
+			return r_res
+		return {"value": _to_bool(l_res["value"]) or _to_bool(r_res["value"])}
+
+	# 2. Boolean 'and'
+	var and_pos := _find_rightmost_keyword_op(s, "and")
+	if and_pos != -1:
+		var left_str := s.substr(0, and_pos).strip_edges()
+		var right_str := s.substr(and_pos + 3).strip_edges()
+		var l_res: Dictionary = _eval_expr(left_str, line_num, env)
+		if l_res.has("error"):
+			return l_res
+		var r_res: Dictionary = _eval_expr(right_str, line_num, env)
+		if r_res.has("error"):
+			return r_res
+		return {"value": _to_bool(l_res["value"]) and _to_bool(r_res["value"])}
+
+	# 3. Unary 'not'
+	if s.begins_with("not ") or s.begins_with("not("):
+		var sub_str := s.substr(3).strip_edges()
+		var u_res: Dictionary = _eval_expr(sub_str, line_num, env)
+		if u_res.has("error"):
+			return u_res
+		return {"value": not _to_bool(u_res["value"])}
+
+	# 4. Comparison operators: ==, !=, <=, >=, <, >
+	var cmp_info := _find_rightmost_cmp_op(s)
+	if cmp_info.has("index"):
+		var c_idx: int = int(cmp_info["index"])
+		var c_op: String = str(cmp_info["op"])
+		var left_str := s.substr(0, c_idx).strip_edges()
+		var right_str := s.substr(c_idx + c_op.length()).strip_edges()
+		var l_res: Dictionary = _eval_expr(left_str, line_num, env)
+		if l_res.has("error"):
+			return l_res
+		var r_res: Dictionary = _eval_expr(right_str, line_num, env)
+		if r_res.has("error"):
+			return r_res
+		return _apply_cmp_op(l_res["value"], c_op, r_res["value"], line_num)
+
+	# 5. Binary addition / subtraction
 	var add_sub_pos := _find_rightmost_top_op(s, ["+", "-"])
 	if add_sub_pos != -1:
 		var op_ch := s[add_sub_pos]
 		var left_str := s.substr(0, add_sub_pos).strip_edges()
 		var right_str := s.substr(add_sub_pos + 1).strip_edges()
 		if left_str.is_empty():
-			# Unary + or -
 			var u_res: Dictionary = _eval_expr(right_str, line_num, env)
 			if u_res.has("error"):
 				return u_res
@@ -327,7 +590,7 @@ static func _eval_expr(expr: String, line_num: int, env: Dictionary) -> Dictiona
 			return r_res
 		return _apply_binary_op(l_res["value"], op_ch, r_res["value"], line_num)
 
-	# 2. Binary *, //, /, %
+	# 6. Binary *, //, /, %
 	var mul_pos := _find_rightmost_mul_op(s)
 	if mul_pos.has("index"):
 		var idx: int = mul_pos["index"]
@@ -342,7 +605,7 @@ static func _eval_expr(expr: String, line_num: int, env: Dictionary) -> Dictiona
 			return r_res
 		return _apply_binary_op(l_res["value"], op_str, r_res["value"], line_num)
 
-	# 3. Built-in conversion functions in expressions: int(x), str(x), abs(x)
+	# 7. Built-in conversion functions: int(x), str(x), abs(x), len(x)
 	var paren_idx := s.find("(")
 	if paren_idx != -1 and s.ends_with(")"):
 		var fn := s.substr(0, paren_idx).strip_edges()
@@ -370,24 +633,24 @@ static func _eval_expr(expr: String, line_num: int, env: Dictionary) -> Dictiona
 				return {"value": v.size()}
 			return {"error": {"type": "TypeError", "message": "TypeError (Baris %d): len() membutuhkan string atau list." % line_num}}
 
-	# 4. String literal
+	# 8. String literal
 	if (s.begins_with("\"") and s.ends_with("\"")) or (s.begins_with("'") and s.ends_with("'")):
 		if s.length() >= 2:
 			return {"value": s.substr(1, s.length() - 2)}
 
-	# 5. Boolean literal
+	# 9. Boolean literal
 	if s == "True":
 		return {"value": true}
 	if s == "False":
 		return {"value": false}
 
-	# 6. Numeric literal
+	# 10. Numeric literal
 	if s.is_valid_int():
 		return {"value": s.to_int()}
 	if s.is_valid_float():
 		return {"value": s.to_float()}
 
-	# 7. Variable lookup
+	# 11. Variable lookup
 	if _is_valid_identifier(s):
 		if env.has(s):
 			return {"value": env[s]}
@@ -409,6 +672,39 @@ static func _eval_expr(expr: String, line_num: int, env: Dictionary) -> Dictiona
 			"message": "SyntaxError (Baris %d): Tidak dapat memahami ekspresi '%s'." % [line_num, s]
 		}
 	}
+
+
+static func _apply_cmp_op(left: Variant, op: String, right: Variant, line_num: int) -> Dictionary:
+	var lt := typeof(left)
+	var rt := typeof(right)
+	if op == "==":
+		return {"value": left == right}
+	if op == "!=":
+		return {"value": left != right}
+
+	var l_num := (lt == TYPE_INT or lt == TYPE_FLOAT)
+	var r_num := (rt == TYPE_INT or rt == TYPE_FLOAT)
+	if not l_num or not r_num:
+		return {
+			"error": {
+				"type": "TypeError",
+				"message": "TypeError (Baris %d): Perbandingan '%s' membutuhkan angka, bukan '%s' dan '%s'." % [line_num, op, str(left), str(right)]
+			}
+		}
+
+	var lf := float(left)
+	var rf := float(right)
+	match op:
+		"<":
+			return {"value": lf < rf}
+		">":
+			return {"value": lf > rf}
+		"<=":
+			return {"value": lf <= rf}
+		">=":
+			return {"value": lf >= rf}
+
+	return {"error": {"type": "SyntaxError", "message": "SyntaxError (Baris %d): Operator perbandingan '%s' tidak dikenal." % [line_num, op]}}
 
 
 static func _apply_binary_op(left, op: String, right, line_num: int) -> Dictionary:
@@ -460,6 +756,66 @@ static func _apply_binary_op(left, op: String, right, line_num: int) -> Dictiona
 			return {"value": int(left) % int(right)}
 
 	return {"error": {"type": "SyntaxError", "message": "SyntaxError (Baris %d): Operator '%s' tidak dikenal." % [line_num, op]}}
+
+
+static func _find_rightmost_keyword_op(s: String, kw: String) -> int:
+	var depth := 0
+	var in_s := false
+	var in_d := false
+	var best := -1
+	var kw_len := kw.length()
+	for i in range(s.length()):
+		var c := s[i]
+		if c == "'" and not in_d:
+			in_s = not in_s
+		elif c == "\"" and not in_s:
+			in_d = not in_d
+		elif not in_s and not in_d:
+			if c == "(":
+				depth += 1
+			elif c == ")":
+				depth -= 1
+			elif depth == 0 and i + kw_len <= s.length() and s.substr(i, kw_len) == kw:
+				var prev_ok := (i > 0 and (s[i - 1] == " " or s[i - 1] == "\t" or s[i - 1] == ")"))
+				var next_ok := (i + kw_len < s.length() and (s[i + kw_len] == " " or s[i + kw_len] == "\t" or s[i + kw_len] == "("))
+				if prev_ok and next_ok:
+					best = i
+	return best
+
+
+static func _find_rightmost_cmp_op(s: String) -> Dictionary:
+	var depth := 0
+	var in_s := false
+	var in_d := false
+	var best_idx := -1
+	var best_op := ""
+	var i := 0
+	while i < s.length():
+		var c := s[i]
+		if c == "'" and not in_d:
+			in_s = not in_s
+		elif c == "\"" and not in_s:
+			in_d = not in_d
+		elif not in_s and not in_d:
+			if c == "(":
+				depth += 1
+			elif c == ")":
+				depth -= 1
+			elif depth == 0:
+				if i + 1 < s.length():
+					var two := s.substr(i, 2)
+					if two == "==" or two == "!=" or two == "<=" or two == ">=":
+						best_idx = i
+						best_op = two
+						i += 2
+						continue
+				if c == "<" or c == ">":
+					best_idx = i
+					best_op = c
+		i += 1
+	if best_idx != -1:
+		return {"index": best_idx, "op": best_op}
+	return {}
 
 
 static func _find_top_level_assign(code: String) -> int:
@@ -522,13 +878,12 @@ static func _find_rightmost_top_op(s: String, ops: Array) -> int:
 			elif c == ")":
 				depth -= 1
 			elif depth == 0 and ops.has(c):
-				# Check if binary or unary: if preceded by another operator, skip so binary splits first
 				var prev_non_space := ""
 				for j in range(i - 1, -1, -1):
 					if s[j] != " " and s[j] != "\t":
 						prev_non_space = s[j]
 						break
-				if prev_non_space != "+" and prev_non_space != "-" and prev_non_space != "*" and prev_non_space != "/" and prev_non_space != "%":
+				if prev_non_space != "+" and prev_non_space != "-" and prev_non_space != "*" and prev_non_space != "/" and prev_non_space != "%" and prev_non_space != "=" and prev_non_space != "<" and prev_non_space != ">":
 					best = i
 	return best
 

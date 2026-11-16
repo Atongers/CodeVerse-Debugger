@@ -1,3 +1,4 @@
+@tool
 extends CanvasLayer
 class_name TerminalOverlay
 
@@ -82,7 +83,11 @@ func open_terminal(terminal_id: String, config: Dictionary, total_terminals: int
 	var title: String = str(config.get("title", terminal_id))
 	var is_done: bool = _solved_terminals.get(terminal_id, false)
 	var status_tag: String = " [SELESAI ✓]" if is_done else ""
-	_header_label.text = "Terminal %d/%d — %s%s" % [idx, total_terminals, title, status_tag]
+	var scanner_tag: String = ""
+	var sm: Node = get_node_or_null("/root/SaveManager")
+	if sm and sm.has_method("has_upgrade") and bool(sm.call("has_upgrade", "util_4")) and config.has("bug_Highlight_line"):
+		scanner_tag = "  [Scanner: Cek Baris #%d]" % int(config.get("bug_Highlight_line", 1))
+	_header_label.text = "Terminal %d/%d — %s%s%s" % [idx, total_terminals, title, status_tag, scanner_tag]
 
 	var initial_code: String = _extract_initial_code(config)
 	var code_to_show: String = _saved_codes.get(terminal_id, initial_code)
@@ -191,17 +196,24 @@ func _clear_line_highlights() -> void:
 			_code_edit.set_line_background_color(i, Color(0, 0, 0, 0))
 
 
+func get_used_hints(terminal_id: String) -> int:
+	return int(_hint_levels.get(terminal_id, 0))
+
+
 func _on_run_pressed() -> void:
 	if _is_running_steps:
 		return
 
+	var sm: Node = get_node_or_null("/root/SaveManager")
+	var run_cost: float = 5.0 if (sm and sm.has_method("has_upgrade") and bool(sm.call("has_upgrade", "util_3"))) else 10.0
+
 	var player = get_tree().get_first_node_in_group("player")
 	if player and player.has_method("consume_energy"):
-		if player.energy < 10.0:
+		if player.energy < run_cost:
 			_output_rtl.clear()
-			_output_rtl.append_text("[color=#ef4444][b]BATERAI TIDAK CUKUP:[/b] Butuh minimal 10 Energi untuk menguji kode (Tersisa: %d). Berdirilah sejenak di dekat terminal untuk mengisi daya![/color]" % int(player.energy))
+			_output_rtl.append_text("[color=#ef4444][b]BATERAI TIDAK CUKUP:[/b] Butuh minimal %d Energi untuk menguji kode (Tersisa: %d). Tunggu sejenak hingga energi beregenerasi![/color]" % [int(run_cost), int(player.energy)])
 			return
-		player.consume_energy(10.0)
+		player.consume_energy(run_cost)
 
 	_saved_codes[_current_terminal_id] = _code_edit.text
 	_clear_line_highlights()
@@ -530,7 +542,7 @@ func _build_ui() -> void:
 
 	_lint_rtl = RichTextLabel.new()
 	_lint_rtl.bbcode_enabled = true
-	_lint_rtl.scroll_following = true
+	_lint_rtl.scroll_following = false
 	lint_panel.add_child(_lint_rtl)
 
 	# 3. Bottom Action & Speed Bar

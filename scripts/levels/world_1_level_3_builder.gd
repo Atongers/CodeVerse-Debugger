@@ -404,11 +404,24 @@ func _build_bug_log_modal() -> void:
 	var menu_btn := Button.new()
 	menu_btn.text = "Kembali ke Main Menu"
 	menu_btn.custom_minimum_size = Vector2(160, 34)
-	UiPixelTheme.apply_pixel_button(menu_btn, "primary", 12, 6)
+	UiPixelTheme.apply_pixel_button(menu_btn, "secondary", 12, 6)
 	menu_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/ui/menus/main_menu.tscn")
 	)
 	btn_row.add_child(menu_btn)
+
+	var next_world_btn := Button.new()
+	next_world_btn.name = "NextWorld2Btn"
+	next_world_btn.text = "▶ Ke Dunia 2: Condition Canyon"
+	next_world_btn.custom_minimum_size = Vector2(240, 34)
+	UiPixelTheme.apply_pixel_button(next_world_btn, "primary", 12, 6)
+	next_world_btn.pressed.connect(func() -> void:
+		var sm := get_node_or_null("/root/SaveManager")
+		if sm and sm.has_method("configure_w2_act_session"):
+			sm.call("configure_w2_act_session", 1, false)
+		get_tree().change_scene_to_file("res://scenes/levels/world_2_condition_canyon/world_2_city.tscn")
+	)
+	btn_row.add_child(next_world_btn)
 
 	var close_btn := Button.new()
 	close_btn.text = "Tutup [L / Esc]"
