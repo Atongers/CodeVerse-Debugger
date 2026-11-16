@@ -352,7 +352,7 @@ func _build_ui() -> void:
 	root_vbox.add_child(footer_row)
 
 	var ver_lbl := Label.new()
-	ver_lbl.text = "BUILD v2.0 • CONDITION CANYON"
+	ver_lbl.text = "BUILD v1.1 • SYNTAX SHORE"
 	ver_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _font_regular:
 		ver_lbl.add_theme_font_override("font", _font_regular)
