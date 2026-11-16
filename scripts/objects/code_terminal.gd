@@ -67,7 +67,7 @@ func _process(_delta: float) -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if body is CharacterBody2D:
+	if body is CharacterBody2D and (body.is_in_group("player") or body.name.begins_with("Dex")):
 		_player_in_range = true
 		if is_instance_valid(_prompt_label):
 			_prompt_label.visible = true
@@ -75,7 +75,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _on_body_exited(body: Node2D) -> void:
-	if body is CharacterBody2D:
+	if body is CharacterBody2D and (body.is_in_group("player") or body.name.begins_with("Dex")):
 		_player_in_range = false
 		if is_instance_valid(_prompt_label):
 			_prompt_label.visible = false

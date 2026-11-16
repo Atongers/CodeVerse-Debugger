@@ -35,6 +35,7 @@ var _font_regular: FontFile = null
 var _modal_dimmer: ColorRect = null
 var _level_select_modal: PanelContainer = null
 var _bug_log_modal: PanelContainer = null
+var _achievements_modal: PanelContainer = null
 var _settings_modal: PanelContainer = null
 var _last_focused_button: Control = null
 
@@ -70,6 +71,10 @@ var _user_settings: Dictionary = {
 
 
 func _ready() -> void:
+	if has_node("/root/SaveManager"):
+		var sm_init := get_node("/root/SaveManager")
+		if sm_init.has_method("end_w2_sandbox_if_active"):
+			sm_init.call("end_w2_sandbox_if_active")
 	_ensure_audio_buses()
 	_load_user_settings()
 	_load_fonts()
@@ -315,6 +320,11 @@ func _build_ui() -> void:
 	b_bug_log.pressed.connect(_on_bug_log_pressed)
 	btn_vbox.add_child(b_bug_log)
 
+	var icon_ach := UiPixelTheme.get_achievement_icon(0, true)
+	var b_achievements := _create_menu_button("ACHIEVEMENTS", COLOR_GREEN, icon_ach)
+	b_achievements.pressed.connect(_on_achievements_pressed)
+	btn_vbox.add_child(b_achievements)
+
 	var b_settings := _create_menu_button("PENGATURAN", Color(0.796, 0.835, 0.882), icon_settings)
 	b_settings.pressed.connect(_on_settings_pressed)
 	btn_vbox.add_child(b_settings)
@@ -373,6 +383,7 @@ func _build_ui() -> void:
 	# 5. Build Pop-up Modals
 	_build_level_select_modal()
 	_build_bug_log_modal()
+	_build_achievements_modal()
 	_build_settings_modal()
 
 
@@ -902,13 +913,17 @@ func _refresh_modals_after_progression() -> void:
 	if is_instance_valid(_bug_log_modal):
 		_bug_log_modal.queue_free()
 		_bug_log_modal = null
+	if is_instance_valid(_achievements_modal):
+		_achievements_modal.queue_free()
+		_achievements_modal = null
 	_build_level_select_modal()
 	_build_bug_log_modal()
+	_build_achievements_modal()
 
 
 func _build_level_select_modal() -> void:
 	var header_icon := UiPixelTheme.load_atlas(UiPixelTheme.TEX_WORLD_BADGES, Rect2(0, 0, 16, 16))
-	_level_select_modal = _create_base_modal("PILIH DUNIA DAN LEVEL", Vector2(740, 480), header_icon)
+	_level_select_modal = _create_base_modal("PILIH DUNIA DAN LEVEL", Vector2(780, 490), header_icon)
 	add_child(_level_select_modal)
 
 	var vbox: VBoxContainer = _level_select_modal.get_node("OuterVBox/ContentScroll/VBox")
@@ -919,14 +934,14 @@ func _build_level_select_modal() -> void:
 			"name": "Dunia 1: Syntax Shore",
 			"concept": "variabel, print, aritmetika",
 			"unlocked": true,
-			"status": "Level 1 Terbuka (Tersedia)",
+			"status": "3 Level Tersedia",
 		},
 		{
 			"id": 2,
 			"name": "Dunia 2: Condition Canyon",
-			"concept": "if / elif / else, perbandingan, logika",
-			"unlocked": false,
-			"status": "Terkunci (Selesaikan Bos Dunia 1)",
+			"concept": "if / elif / else, perbandingan, boolean",
+			"unlocked": true,
+			"status": "Kota Terpadu (3 Act Checkpoint)",
 		},
 		{
 			"id": 3,
@@ -955,13 +970,14 @@ func _build_level_select_modal() -> void:
 		var item := PanelContainer.new()
 		item.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var is_unlocked: bool = bool(w["unlocked"])
+		var world_id: int = int(w["id"])
 		item.add_theme_stylebox_override("panel", UiPixelTheme.make_card_style(0 if is_unlocked else 2, 14, 10))
 
 		var ih := HBoxContainer.new()
-		ih.add_theme_constant_override("separation", 14)
+		ih.add_theme_constant_override("separation", 12)
 		item.add_child(ih)
 
-		var w_badge_tex := UiPixelTheme.load_atlas(UiPixelTheme.TEX_WORLD_BADGES, Rect2(int(w["id"]) * 16, 0, 16, 16))
+		var w_badge_tex := UiPixelTheme.load_atlas(UiPixelTheme.TEX_WORLD_BADGES, Rect2(world_id * 16, 0, 16, 16))
 		var w_badge := UiPixelTheme.make_icon_rect(w_badge_tex, Vector2(24, 24))
 		w_badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		ih.add_child(w_badge)
@@ -995,7 +1011,7 @@ func _build_level_select_modal() -> void:
 		w_concept.add_theme_color_override("font_color", Color(0.8, 0.85, 0.92) if is_unlocked else Color(0.48, 0.52, 0.6))
 		iv.add_child(w_concept)
 
-		if is_unlocked:
+		if is_unlocked and world_id == 1:
 			var sm: Node = get_node_or_null("/root/SaveManager")
 			var l1_done: bool = sm and sm.call("is_level_completed", "world_1_level_1")
 			var l2_done: bool = sm and sm.call("is_level_completed", "world_1_level_2")
@@ -1041,6 +1057,37 @@ func _build_level_select_modal() -> void:
 				get_tree().change_scene_to_file("res://scenes/levels/world_1_syntax_shore/level_3.tscn")
 			)
 			btn_box.add_child(l3_btn)
+		elif is_unlocked and world_id == 2:
+			var sm: Node = get_node_or_null("/root/SaveManager")
+			var w2_done: bool = sm and sm.call("is_level_completed", "world_2_city")
+			var btn_box := HBoxContainer.new()
+			btn_box.add_theme_constant_override("separation", 6)
+			ih.add_child(btn_box)
+
+			var acts := [
+				{"act": 1, "label": "Act 1: Scrap Haven", "sandbox": false},
+				{"act": 2, "label": "Act 2: Gardu Timur", "sandbox": true},
+				{"act": 3, "label": "Act 3: Boss Gatekeeper", "sandbox": true},
+			]
+			for act_cfg in acts:
+				var abtn := Button.new()
+				abtn.name = "W2_Act%dBtn" % int(act_cfg["act"])
+				abtn.text = str(act_cfg["label"])
+				abtn.icon = UiPixelTheme.load_atlas(UiPixelTheme.TEX_LEVEL_STATE_ICONS, Rect2(16 if w2_done else 0, 0, 16, 16))
+				abtn.add_theme_constant_override("icon_max_width", 14)
+				if _font_semibold:
+					abtn.add_theme_font_override("font", _font_semibold)
+				abtn.add_theme_font_size_override("font_size", 11)
+				abtn.custom_minimum_size = Vector2(126, 34)
+				UiPixelTheme.apply_pixel_button(abtn, "primary", 8, 6)
+				var act_num := int(act_cfg["act"])
+				var use_sb := bool(act_cfg["sandbox"])
+				abtn.pressed.connect(func() -> void:
+					if sm and sm.has_method("configure_w2_act_session"):
+						sm.call("configure_w2_act_session", act_num, use_sb)
+					get_tree().change_scene_to_file("res://scenes/levels/world_2_condition_canyon/world_2_city.tscn")
+				)
+				btn_box.add_child(abtn)
 		else:
 			var lock_row := HBoxContainer.new()
 			lock_row.add_theme_constant_override("separation", 6)
@@ -1163,10 +1210,72 @@ func _build_bug_log_modal() -> void:
 	]
 
 	var sm: Node = get_node_or_null("/root/SaveManager")
+	for w2_entry in World2Data.BUG_CATALOG_W2:
+		entries.append(w2_entry)
 	for e in entries:
 		var bug_id: String = str(e["id"])
 		var is_unlocked: bool = sm.call("is_bug_log_unlocked", bug_id) if sm else true
 		vbox.add_child(UiPixelTheme.build_bug_card(e, is_unlocked, _font_bold, _font_regular, _font_semibold))
+
+
+func _build_achievements_modal() -> void:
+	var header_icon := UiPixelTheme.get_achievement_icon(0, true)
+	_achievements_modal = _create_base_modal("GALERI ACHIEVEMENTS — 12 RPG BADGES", Vector2(760, 480), header_icon)
+	add_child(_achievements_modal)
+
+	var vbox: VBoxContainer = _achievements_modal.get_node("OuterVBox/ContentScroll/VBox")
+	var sm: Node = get_node_or_null("/root/SaveManager")
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 10)
+	vbox.add_child(grid)
+
+	for i in range(1, 13):
+		var ach_id := "ACH-%02d" % i
+		var meta: Dictionary = SaveManager.ACHIEVEMENT_METADATA.get(ach_id, {"id": ach_id, "col": i - 1, "name": ach_id, "desc": ""})
+		var unlocked: bool = sm != null and sm.has_method("is_achievement_unlocked") and bool(sm.call("is_achievement_unlocked", ach_id))
+
+		var card := PanelContainer.new()
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		card.add_theme_stylebox_override("panel", UiPixelTheme.make_card_style(0 if unlocked else 2, 12, 8))
+
+		var hbox := HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 10)
+		card.add_child(hbox)
+
+		var badge_tex := UiPixelTheme.get_achievement_icon(int(meta.get("col", i - 1)), unlocked)
+		if badge_tex:
+			var b_rect := UiPixelTheme.make_icon_rect(badge_tex, Vector2(32, 32))
+			b_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			hbox.add_child(b_rect)
+
+		var cv := VBoxContainer.new()
+		cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cv.add_theme_constant_override("separation", 3)
+		hbox.add_child(cv)
+
+		var title_lbl := Label.new()
+		title_lbl.text = "[%s] %s%s" % [ach_id, str(meta.get("name", ach_id)), " ✓" if unlocked else " (Terkunci)"]
+		title_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if _font_bold:
+			title_lbl.add_theme_font_override("font", _font_bold)
+		title_lbl.add_theme_font_size_override("font_size", 12)
+		title_lbl.add_theme_color_override("font_color", COLOR_GREEN if unlocked else Color(0.55, 0.62, 0.72))
+		cv.add_child(title_lbl)
+
+		var desc_lbl := Label.new()
+		desc_lbl.text = str(meta.get("desc", ""))
+		desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if _font_regular:
+			desc_lbl.add_theme_font_override("font", _font_regular)
+		desc_lbl.add_theme_font_size_override("font_size", 11)
+		desc_lbl.add_theme_color_override("font_color", Color(0.84, 0.9, 0.96) if unlocked else Color(0.48, 0.54, 0.64))
+		cv.add_child(desc_lbl)
+
+		grid.add_child(card)
 
 
 func _make_settings_section_header(icon_col: int, title_text: String, color: Color) -> HBoxContainer:
@@ -1515,7 +1624,7 @@ func _create_base_modal(title_text: String, size_vec: Vector2, header_icon_tex: 
 func _input(event: InputEvent) -> void:
 	var is_cancel: bool = (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE) or event.is_action_pressed("ui_cancel")
 	if is_cancel:
-		if (_level_select_modal and _level_select_modal.visible) or (_bug_log_modal and _bug_log_modal.visible) or (_settings_modal and _settings_modal.visible):
+		if (_level_select_modal and _level_select_modal.visible) or (_bug_log_modal and _bug_log_modal.visible) or (_achievements_modal and _achievements_modal.visible) or (_settings_modal and _settings_modal.visible):
 			_close_all_modals()
 			get_viewport().set_input_as_handled()
 
@@ -1545,6 +1654,10 @@ func _on_bug_log_pressed() -> void:
 	_open_modal(_bug_log_modal)
 
 
+func _on_achievements_pressed() -> void:
+	_open_modal(_achievements_modal)
+
+
 func _on_settings_pressed() -> void:
 	_open_modal(_settings_modal)
 
@@ -1560,6 +1673,8 @@ func _close_all_modals(restore_focus: bool = true) -> void:
 		_level_select_modal.visible = false
 	if _bug_log_modal:
 		_bug_log_modal.visible = false
+	if _achievements_modal:
+		_achievements_modal.visible = false
 	if _settings_modal:
 		_settings_modal.visible = false
 	if restore_focus and is_instance_valid(_last_focused_button):
