@@ -31,6 +31,10 @@ func _on_body_entered(body: Node2D) -> void:
 		body.checkpoint_position = global_position + Vector2(8.0, 16.0)
 		if not _activated:
 			_activated = true
+			if not Engine.is_editor_hint():
+				var am := get_node_or_null("/root/AudioManager")
+				if am and am.has_method("play_sfx"):
+					am.call("play_sfx", "checkpoint_activate")
 			if is_instance_valid(_sprite):
 				_sprite.modulate = Color(0.55, 1.0, 0.78, 1.0)
 			if is_instance_valid(_status_label):

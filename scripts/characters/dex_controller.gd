@@ -43,6 +43,8 @@ var controls_enabled: bool = true
 var _coyote_timer: float = 0.0
 var _jump_buffer_timer: float = 0.0
 var _was_on_floor: bool = false
+var _was_sprinting: bool = false
+var _step_audio_timer: float = 0.0
 var _sprint_dust_timer: float = 0.0
 var _hurt_anim_timer: float = 0.0
 var _camera_trauma: float = 0.0
@@ -120,6 +122,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		_coyote_timer = 0.0
 		_jump_buffer_timer = 0.0
+		_play_sfx("dex_jump")
 
 	if controls_enabled and Input.is_action_just_released("jump") and velocity.y < jump_velocity * 0.5:
 		velocity.y = jump_velocity * 0.5
@@ -157,7 +160,20 @@ func _physics_process(delta: float) -> void:
 		if anim_sprite:
 			anim_sprite.scale = Vector2(1.18, 0.84)
 		VfxBurst.spawn_burst(get_parent(), VFX_DUST_PATH, global_position, 3, 22.0, -14.0)
+		_play_sfx("dex_land")
 	_was_on_floor = is_on_floor()
+
+	if is_sprinting and not _was_sprinting and is_on_floor():
+		_play_sfx("dex_sprint_whoosh")
+	_was_sprinting = is_sprinting
+
+	if is_on_floor() and controls_enabled and absf(velocity.x) > 18.0:
+		_step_audio_timer -= delta
+		if _step_audio_timer <= 0.0:
+			_step_audio_timer = 0.24 if is_sprinting else 0.34
+			_play_sfx("dex_step")
+	else:
+		_step_audio_timer = 0.0
 
 	# Sprint trail VFX (vfx_sprint_trail.png tinted per active skin)
 	if is_sprinting and is_on_floor():
@@ -198,6 +214,7 @@ func take_damage(amount: float, source: String = "") -> void:
 	velocity.y = -120.0
 	player_damaged.emit(amount, source)
 	health_changed.emit(health, max_health)
+	_play_sfx("dex_hit")
 	if health <= 0.0:
 		_handle_death()
 
@@ -216,12 +233,21 @@ func add_energy(amount: float) -> void:
 
 
 func _handle_death() -> void:
+	_play_sfx("dex_collapse")
 	player_died.emit()
 	respawn_at_checkpoint()
 	health = max_health
 	energy = max_energy
 	health_changed.emit(health, max_health)
 	energy_changed.emit(energy, max_energy)
+
+
+func _play_sfx(sfx_id: String) -> void:
+	if Engine.is_editor_hint():
+		return
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.call("play_sfx", sfx_id)
 
 
 func respawn_at_checkpoint() -> void:

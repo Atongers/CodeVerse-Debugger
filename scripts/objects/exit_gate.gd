@@ -14,6 +14,9 @@ const VFX_SOLVED_PATH := "res://assets/sprites/vfx/vfx_energy_solved.png"
 		_update_visual_state()
 		if not Engine.is_editor_hint() and is_unlocked and not was_unlocked and is_inside_tree():
 			VfxBurst.spawn_burst(get_parent(), VFX_SOLVED_PATH, global_position + Vector2(16.0, 4.0), 10, 42.0, -32.0)
+			var am := get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_sfx"):
+				am.call("play_sfx", "exit_gate_open")
 
 var _gate_sprite: Sprite2D = null
 var _status_label: Label = null

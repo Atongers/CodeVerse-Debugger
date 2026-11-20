@@ -136,6 +136,12 @@ func _fire_projectile() -> void:
 
 	get_tree().current_scene.add_child(orb)
 
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if not player or player.global_position.distance_to(global_position) <= 420.0:
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.call("play_sfx", "plasma_shoot", 0.05, -2.0)
+
 	# Trigger visual recoil
 	_recoil_offset = 4.0
 	projectile_fired.emit()

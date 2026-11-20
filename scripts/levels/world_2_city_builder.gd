@@ -52,6 +52,7 @@ var _bug_log_modal: PanelContainer = null
 var _bug_log_title: Label = null
 var _bug_log_subtitle: Label = null
 var _bug_log_vbox: VBoxContainer = null
+var _boss_bgm_active: bool = false
 
 
 func _ready() -> void:
@@ -73,9 +74,19 @@ func _ready() -> void:
 	# Trigger Prolog Cutscene on Act 1 if not yet seen
 	var act_num := int(sm.get("active_w2_act")) if sm else 1
 	var seen_cut := bool(sm.call("get_story_flag", "w2_cutscene_seen", false)) if (sm and sm.has_method("get_story_flag")) else false
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("stop_all_loops"):
+			am.call("stop_all_loops")
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "all")
+		if am.has_method("play_ambience"):
+			am.call("play_ambience", "canyon_wind", 0.8)
 	if act_num == 1 and not seen_cut and cutscene_overlay:
 		cutscene_overlay.start_cutscene()
 		_sync_input_lock()
+	elif am and am.has_method("play_bgm"):
+		am.call("play_bgm", "world2", 0.8)
 
 
 func _process(delta: float) -> void:
@@ -84,6 +95,26 @@ func _process(delta: float) -> void:
 		if _toast_timer <= 0.0 and _toast_panel:
 			_toast_panel.visible = false
 	_sync_input_lock()
+	if dex and not Engine.is_editor_hint():
+		# BeaconPad checkpoint activation for Act 2 & Act 3 pads
+		for act_id in [2, 3]:
+			var pad_pos: Vector2 = ACT_SPAWN_POS[act_id]
+			if dex.global_position.distance_to(pad_pos) < 24.0 and dex.spawn_position.distance_to(pad_pos) > 10.0:
+				dex.spawn_position = pad_pos
+				var am_cp := get_node_or_null("/root/AudioManager")
+				if am_cp and am_cp.has_method("play_sfx"):
+					am_cp.call("play_sfx", "checkpoint_activate")
+				_show_toast("Checkpoint BeaconPad Aktif!")
+		# Boss Gatekeeper encounter BGM crossfade
+		if boss_ai and not (cutscene_overlay and cutscene_overlay.is_open()):
+			var am_b := get_node_or_null("/root/AudioManager")
+			if am_b and am_b.has_method("play_bgm"):
+				if boss_ai.phase < 2 and dex.global_position.x >= 1535.0 and not _boss_bgm_active:
+					_boss_bgm_active = true
+					am_b.call("play_bgm", "boss", 0.8)
+				elif (boss_ai.phase >= 2 or dex.global_position.x < 1460.0) and _boss_bgm_active:
+					_boss_bgm_active = false
+					am_b.call("play_bgm", "world2", 0.8)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -91,11 +122,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if event.keycode == KEY_ESCAPE:
 				if _dialog_modal and _dialog_modal.visible:
-					_dialog_modal.visible = false
-					_sync_input_lock()
+					_close_dialog_modal()
 					get_viewport().set_input_as_handled()
 				elif _bug_log_modal and _bug_log_modal.visible:
 					_bug_log_modal.visible = false
+					var am_c := get_node_or_null("/root/AudioManager")
+					if am_c and am_c.has_method("play_ui"):
+						am_c.call("play_ui", "ui_modal_close")
 					_sync_input_lock()
 					get_viewport().set_input_as_handled()
 				elif top_bar and top_bar.is_pause_popup_open():
@@ -531,6 +564,9 @@ func _create_lore_pickup_node(lore_id: String, pos: Vector2) -> Area2D:
 		if b and b.is_in_group("player"):
 			var sm: Node = get_node_or_null("/root/SaveManager")
 			if sm and sm.has_method("collect_lore_log") and bool(sm.call("collect_lore_log", lid_capture)):
+				var am := get_node_or_null("/root/AudioManager")
+				if am and am.has_method("play_sfx"):
+					am.call("play_sfx", "loot_pickup_item")
 				_show_toast("Data Log Ditemukan: " + lid_capture + " (Buka [J] untuk membaca)")
 				area.visible = false
 				area.set_deferred("monitoring", false)
@@ -738,11 +774,20 @@ func _build_rpg_dialog_modal() -> void:
 	_dialog_close_btn.text = "Tutup Dialog [Esc]"
 	_dialog_close_btn.custom_minimum_size = Vector2(140, 28)
 	UiPixelTheme.apply_pixel_button(_dialog_close_btn, "secondary", 10, 4)
-	_dialog_close_btn.pressed.connect(func() -> void:
-		_dialog_modal.visible = false
-		_sync_input_lock()
-	)
+	_dialog_close_btn.pressed.connect(_close_dialog_modal)
 	b_row.add_child(_dialog_close_btn)
+
+
+func _close_dialog_modal() -> void:
+	if _dialog_modal:
+		_dialog_modal.visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "npc_dialog")
+		if am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_close")
+	_sync_input_lock()
 
 
 func _build_toast_banner() -> void:
@@ -856,6 +901,9 @@ func _toggle_bug_log_modal(is_victory: bool) -> void:
 		return
 	if _bug_log_modal.visible and not is_victory:
 		_bug_log_modal.visible = false
+		var am_c := get_node_or_null("/root/AudioManager")
+		if am_c and am_c.has_method("play_ui"):
+			am_c.call("play_ui", "ui_modal_close")
 		return
 
 	if is_victory:
@@ -875,6 +923,10 @@ func _toggle_bug_log_modal(is_victory: bool) -> void:
 		_bug_log_vbox.add_child(UiPixelTheme.build_bug_card(entry, unlocked))
 
 	_bug_log_modal.visible = true
+	if not is_victory:
+		var am_o := get_node_or_null("/root/AudioManager")
+		if am_o and am_o.has_method("play_ui"):
+			am_o.call("play_ui", "ui_modal_open")
 	_sync_input_lock()
 
 
@@ -965,6 +1017,10 @@ func _on_enemy_defeated(enemy: EnemyTopDown, e_type: int, _drop_pos: Vector2) ->
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if not sm:
 		return
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.call("play_sfx", "loot_pickup_coin")
+		am.call("play_sfx", "loot_pickup_item")
 	var bonus_bits := 5 if (sm.has_method("has_upgrade") and bool(sm.call("has_upgrade", "util_1"))) else 0
 	match e_type:
 		0: # ScrapHound
@@ -1081,6 +1137,13 @@ func _on_terminal_solved(term_id: String, _bug_info: Dictionary) -> void:
 
 
 func _on_boss_restored() -> void:
+	_boss_bgm_active = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("play_bgm"):
+			am.call("play_bgm", "world2", 1.0)
+		if am.has_method("play_ui"):
+			am.call("play_ui", "level_victory")
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if sm:
 		sm.call("unlock_bug_log", "BUG-16")
@@ -1138,18 +1201,34 @@ func _on_npc_interacted(npc: FriendlyNPC) -> void:
 				var is_corr := bool(opt["correct"])
 				UiPixelTheme.apply_pixel_button(obtn, "primary", 10, 4)
 				obtn.pressed.connect(func() -> void:
+					var am_dlg := get_node_or_null("/root/AudioManager")
 					if is_corr:
 						sm.call("set_quest_flag", "iff_dialog_solved", true)
+						if am_dlg and am_dlg.has_method("play_ui"):
+							am_dlg.call("play_ui", "code_solved")
 						_dialog_body_lbl.text = "\"TEPAT SEKALI! Operator '==' membandingkan nilai dan 'and' memastikan kedua syarat terpenuhi. Sekarang perbaiki Terminal 2 di Scrapyard Utara!\""
 						for c in _dialog_choices_vbox.get_children():
 							c.queue_free()
 						_refresh_world_state()
 					else:
+						if am_dlg and am_dlg.has_method("play_ui"):
+							am_dlg.call("play_ui", "code_error")
 						_dialog_body_lbl.text = "\"Hmm, belum tepat! Ingat: gunakan '==' untuk membandingkan dan 'and' dengan senjata_aktif == False. Coba pilih lagi!\""
 				)
 				_dialog_choices_vbox.add_child(obtn)
 		else:
 			_dialog_body_lbl.text = "\"Teka-teki logika IFF sudah kamu pecahkan! Sekarang pergilah ke utara (Distrik 3 Scrapyard) dan perbaiki Terminal 2 [E].\""
 
+	var am_npc := get_node_or_null("/root/AudioManager")
+	if am_npc:
+		if am_npc.has_method("set_ducking"):
+			am_npc.call("set_ducking", true, "npc_dialog")
+		if am_npc.has_method("play_ui"):
+			var blip_id := "npc_blip_elder"
+			if npc.npc_id == "kael":
+				blip_id = "npc_blip_kael"
+			elif npc.npc_id == "unit_m4":
+				blip_id = "npc_blip_medic"
+			am_npc.call("play_ui", blip_id)
 	_dialog_modal.visible = true
 	_sync_input_lock()

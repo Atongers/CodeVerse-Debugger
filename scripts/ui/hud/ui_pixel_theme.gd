@@ -92,6 +92,30 @@ static func make_card_style(col_idx: int = 0, pad_h: int = 12, pad_v: int = 8) -
 	return make_9slice(at, 10, pad_h, pad_v)
 
 
+static func attach_button_sfx(btn: BaseButton) -> void:
+	if not btn or Engine.is_editor_hint() or btn.has_meta("_audio_sfx_hooked"):
+		return
+	btn.set_meta("_audio_sfx_hooked", true)
+	btn.mouse_entered.connect(func() -> void:
+		if not btn.disabled and btn.is_inside_tree():
+			var am := btn.get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_ui"):
+				am.call("play_ui", "ui_hover")
+	)
+	btn.focus_entered.connect(func() -> void:
+		if not btn.disabled and btn.is_inside_tree():
+			var am := btn.get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_ui"):
+				am.call("play_ui", "ui_hover")
+	)
+	btn.pressed.connect(func() -> void:
+		if btn.is_inside_tree():
+			var am := btn.get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_ui"):
+				am.call("play_ui", "ui_click")
+	)
+
+
 static func apply_pixel_button(btn: Button, variant: String = "primary", pad_h: int = 12, pad_v: int = 6) -> void:
 	var row := 0
 	if variant == "secondary":
@@ -119,6 +143,7 @@ static func apply_pixel_button(btn: Button, variant: String = "primary", pad_h: 
 	btn.add_theme_color_override("font_focus_color", Color("#ffffff"))
 	btn.add_theme_color_override("font_pressed_color", Color("#ffffff"))
 	btn.add_theme_color_override("font_disabled_color", Color("#64748b"))
+	attach_button_sfx(btn)
 
 
 static func make_close_button() -> TextureButton:
@@ -138,6 +163,7 @@ static func make_close_button() -> TextureButton:
 			btn.texture_hover = make_atlas(sheet, Rect2(24, 0, 24, 24))
 			btn.texture_focused = make_atlas(sheet, Rect2(24, 0, 24, 24))
 			btn.texture_pressed = make_atlas(sheet, Rect2(48, 0, 24, 24))
+	attach_button_sfx(btn)
 	return btn
 
 

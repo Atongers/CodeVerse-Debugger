@@ -33,6 +33,9 @@ func open_upgrade_tree() -> void:
 	_is_open = true
 	visible = true
 	_refresh_graph()
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_open")
 
 
 func close_upgrade_tree() -> void:
@@ -40,6 +43,9 @@ func close_upgrade_tree() -> void:
 		return
 	_is_open = false
 	visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_close")
 	upgrade_tree_closed.emit()
 
 
@@ -235,6 +241,7 @@ func _refresh_graph() -> void:
 			_selected_node_id = nid_capture
 			_refresh_detail_panel()
 		)
+		UiPixelTheme.attach_button_sfx(btn)
 		_graph_canvas.add_child(btn)
 
 		var cost_lbl := Label.new()
@@ -288,5 +295,8 @@ func _on_buy_pressed() -> void:
 	var parents: Array = nd.get("parents", [])
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if sm and sm.has_method("purchase_upgrade") and bool(sm.call("purchase_upgrade", nid, cost, parents)):
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "upgrade_buy")
 		upgrade_purchased.emit(nid)
 		_refresh_graph()

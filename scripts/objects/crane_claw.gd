@@ -61,6 +61,13 @@ func _ready() -> void:
 	_apply_step(0)
 
 
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "crane_move", get_instance_id(), "crane_move", false, -13.0)
+
+
 func _process(delta: float) -> void:
 	var step := int(Time.get_ticks_msec() / 100.0) % 8
 	if step != _last_step:
@@ -75,6 +82,16 @@ func _process(delta: float) -> void:
 		elif position.x <= _origin_x:
 			position.x = _origin_x
 			_patrol_dir = 1.0
+
+	if not Engine.is_editor_hint() and is_inside_tree():
+		var near_active := false
+		if is_active and (horizontal_patrol_enabled or has_captured_robot):
+			var player := get_tree().get_first_node_in_group("player") as Node2D
+			if player and player.global_position.distance_to(global_position) <= 240.0:
+				near_active = true
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "crane_move", get_instance_id(), "crane_move", near_active, -13.0)
 
 
 func start_shield_patrol() -> void:

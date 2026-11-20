@@ -283,6 +283,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			elif _bug_log_modal and _bug_log_modal.visible:
 				_bug_log_modal.visible = false
+				var am_c := get_node_or_null("/root/AudioManager")
+				if am_c and am_c.has_method("play_ui"):
+					am_c.call("play_ui", "ui_modal_close")
 				get_viewport().set_input_as_handled()
 
 
@@ -345,6 +348,16 @@ func _setup_runtime() -> void:
 
 	_setup_hud_extras()
 	_update_hud_display("Misi 1: Lewati duri lantai & perbaiki Terminal 1 [E] untuk mematikan Laser Patroli")
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("stop_all_loops"):
+			am.call("stop_all_loops")
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "all")
+		if am.has_method("play_bgm"):
+			am.call("play_bgm", "world1", 0.8)
+		if am.has_method("play_ambience"):
+			am.call("play_ambience", "lab_hum", 0.8)
 
 
 func _setup_hud_extras() -> void:
@@ -469,6 +482,9 @@ func _show_lint_toast(msg: String, duration: float = 5.5) -> void:
 	_toast_label.text = msg
 	_toast_panel.visible = true
 	_toast_timer = duration
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "lint_hint")
 
 
 func _build_bug_log_modal() -> void:
@@ -542,6 +558,9 @@ func _toggle_bug_log_modal(is_level_clear: bool) -> void:
 		return
 	if _bug_log_modal.visible and not is_level_clear:
 		_bug_log_modal.visible = false
+		var am_c := get_node_or_null("/root/AudioManager")
+		if am_c and am_c.has_method("play_ui"):
+			am_c.call("play_ui", "ui_modal_close")
 		return
 
 	if _next_level_btn:
@@ -735,6 +754,9 @@ func _on_level_completed() -> void:
 	if _level_completed:
 		return
 	_level_completed = true
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "level_victory")
 	var sm := get_node_or_null("/root/SaveManager")
 	var newly_unlocked: Array = []
 	if sm and sm.has_method("record_level_completion"):

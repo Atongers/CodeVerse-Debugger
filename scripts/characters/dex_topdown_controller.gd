@@ -37,6 +37,8 @@ var _hit_anim_timer: float = 0.0
 var _collapse_timer: float = 0.0
 var _iframe_timer: float = 0.0
 var _anim_clock: float = 0.0
+var _was_sprinting: bool = false
+var _step_audio_timer: float = 0.0
 
 var _sprite: Sprite2D = null
 var _col_shape: CollisionShape2D = null
@@ -316,6 +318,16 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	global_position.x = clampf(global_position.x, 16.0, 1904.0)
 	global_position.y = clampf(global_position.y, 24.0, 1264.0)
+	if is_sprinting and not _was_sprinting:
+		_play_sfx("dex_sprint_whoosh")
+	_was_sprinting = is_sprinting
+	if is_moving and velocity.length_squared() > 25.0:
+		_step_audio_timer -= delta
+		if _step_audio_timer <= 0.0:
+			_step_audio_timer = 0.23 if is_sprinting else 0.33
+			_play_sfx("dex_step")
+	else:
+		_step_audio_timer = 0.0
 	_update_animation_frame(is_sprinting)
 
 
@@ -386,6 +398,7 @@ func try_fire_emp() -> bool:
 			emp_tier = 2
 
 	emp_fired.emit(global_position, emp_radius, emp_damage, emp_stun_duration, emp_tier)
+	_play_sfx("emp_pulse")
 	return true
 
 
@@ -420,6 +433,7 @@ func use_quick_repair_patch() -> bool:
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if sm and sm.has_method("consume_item") and bool(sm.call("consume_item", "repair_patch", 1)):
 		heal(50.0)
+		_play_sfx("quick_heal")
 		return true
 	return false
 
@@ -430,6 +444,7 @@ func use_quick_battery_cell() -> bool:
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if sm and sm.has_method("consume_item") and bool(sm.call("consume_item", "battery_cell", 1)):
 		restore_energy(50.0, false)
+		_play_sfx("quick_battery")
 		return true
 	return false
 
@@ -442,6 +457,7 @@ func take_damage(amount: float, knockback_from: Vector2 = Vector2.ZERO) -> void:
 	health_changed.emit(health, max_health)
 	_iframe_timer = 0.75
 	_hit_anim_timer = 0.28
+	_play_sfx("dex_hit")
 
 	if knockback_from != Vector2.ZERO:
 		var dir := (global_position - knockback_from).normalized()
@@ -454,6 +470,7 @@ func take_damage(amount: float, knockback_from: Vector2 = Vector2.ZERO) -> void:
 
 	if health <= 0.0:
 		_collapse_timer = 1.2
+		_play_sfx("dex_collapse")
 		player_collapsed.emit()
 
 
@@ -463,3 +480,11 @@ func _respawn_at_checkpoint() -> void:
 	energy = max_energy
 	health_changed.emit(health, max_health)
 	energy_changed.emit(energy, max_energy)
+
+
+func _play_sfx(sfx_id: String) -> void:
+	if Engine.is_editor_hint():
+		return
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.call("play_sfx", sfx_id)
