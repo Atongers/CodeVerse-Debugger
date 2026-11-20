@@ -25,6 +25,9 @@ func open_journal() -> void:
 	_is_open = true
 	visible = true
 	_refresh_journal()
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_open")
 
 
 func close_journal() -> void:
@@ -32,6 +35,9 @@ func close_journal() -> void:
 		return
 	_is_open = false
 	visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_close")
 	journal_closed.emit()
 
 

@@ -22,6 +22,7 @@ var _output_lbl: RichTextLabel = null
 var _hint_btn: Button = null
 var _run_craft_btn: Button = null
 var _dex_ref: Node = null
+var _suppress_text_change: bool = false
 
 
 func _ready() -> void:
@@ -40,6 +41,12 @@ func open_workbench(dex: Node = null) -> void:
 	visible = true
 	_refresh_all()
 	_load_calibration_recipe(_selected_cal_idx)
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", true, "workbench")
+		if am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_open")
 
 
 func close_workbench() -> void:
@@ -47,6 +54,12 @@ func close_workbench() -> void:
 		return
 	_is_open = false
 	visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "workbench")
+		if am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_close")
 	workbench_closed.emit()
 
 
@@ -203,6 +216,12 @@ func _build_ui() -> void:
 	_code_edit.gutters_draw_line_numbers = true
 	_code_edit.indent_automatic = true
 	_code_edit.add_theme_font_size_override("font_size", 13)
+	_code_edit.text_changed.connect(func() -> void:
+		if not _suppress_text_change:
+			var am := get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_ui"):
+				am.call("play_ui", "code_type")
+	)
 	right_v.add_child(_code_edit)
 
 	_output_lbl = RichTextLabel.new()
@@ -359,6 +378,9 @@ func _craft_instant_recipe(rec: Dictionary) -> void:
 		_dex_ref.call("restore_energy", 100.0, true)
 	elif sm and sm.has_method("add_item"):
 		sm.call("add_item", res_id, int(rec.get("result_count", 1)))
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.call("play_sfx", "workbench_weld")
 	item_crafted.emit(res_id)
 	_refresh_all()
 	_update_cal_ingredients_label()
@@ -379,7 +401,9 @@ func _load_calibration_recipe(idx: int) -> void:
 	var joined := PackedStringArray()
 	for l in lines:
 		joined.append(str(l))
+	_suppress_text_change = true
 	_code_edit.text = "\n".join(joined)
+	_suppress_text_change = false
 
 	var h_cnt := int(_hint_counts.get(rec_id, 0))
 	_hint_btn.text = "Hint (%d/3)" % h_cnt
@@ -406,14 +430,22 @@ func _on_hint_pressed() -> void:
 	_hint_counts[rec_id] = cur
 	_hint_btn.text = "Hint (%d/%d)" % [cur, hints.size()]
 	_output_lbl.text = "[color=#fbbf24][b]Hint %d:[/b] %s[/color]" % [cur, str(hints[cur - 1])]
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "lint_hint")
 
 
 func _on_run_calibrate_pressed() -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "code_run")
 	var rec: Dictionary = World2Data.CALIBRATION_RECIPES[_selected_cal_idx]
 	var eff_ing := _get_effective_ingredients(rec["ingredients"] as Dictionary)
 	var res: Dictionary = PythonInterpreter.run_script(_code_edit.text, ["rakit_item"])
 	if not bool(res.get("ok", false)):
 		_output_lbl.text = "[color=#f87171][b]✗ %s[/b]\n(Bahan aman, belum dipotong.)[/color]" % str(res.get("error", "Error"))
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "code_error")
 		return
 
 	var calls: Array = res.get("calls", [])
@@ -430,10 +462,14 @@ func _on_run_calibrate_pressed() -> void:
 
 	if not matched:
 		_output_lbl.text = "[color=#fbbf24][b]⚠ Kalibrasi Belum Tepat:[/b] Skrip menghasilkan rakit_item(\"%s\"), sedangkan dibutuhkan rakit_item(\"%s\"). Bahan tidak dipotong.[/color]" % [got_arg, target_arg]
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "code_error")
 		return
 
 	if not _has_ingredients(eff_ing):
 		_output_lbl.text = "[color=#fbbf24][b]✓ Logika Kode Benar![/b] Namun bahan di inventori belum cukup untuk merakit item ini.[/color]"
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "code_error")
 		return
 
 	_consume_ingredients(eff_ing)
@@ -451,6 +487,11 @@ func _on_run_calibrate_pressed() -> void:
 				sm.call("unlock_achievement", "ACH-07")
 
 	_output_lbl.text = "[color=#4ade80][b]✓ KALIBRASI SUKSES![/b] 1x %s berhasil dirakit ke inventori![/color]" % str(rec["name"])
+	if am:
+		if am.has_method("play_ui"):
+			am.call("play_ui", "code_solved")
+		if am.has_method("play_sfx"):
+			am.call("play_sfx", "workbench_weld")
 	item_crafted.emit(res_id)
 	_refresh_all()
 	_update_cal_ingredients_label()

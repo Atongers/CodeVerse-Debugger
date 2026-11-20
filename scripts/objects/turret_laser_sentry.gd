@@ -178,6 +178,9 @@ func _update_laser() -> void:
 				_laser_line.default_color = COLOR_RED_LASER
 				if is_instance_valid(_head_sprite):
 					_head_sprite.texture = load(HEAD_RED_PATH)
+				var am := get_node_or_null("/root/AudioManager")
+				if am and am.has_method("play_sfx"):
+					am.call("play_sfx", "turret_scan_alert")
 				player_tripped.emit(collider)
 			if _damage_timer <= 0.0 and collider.has_method("take_damage"):
 				collider.take_damage(laser_damage, "laser_sentry")

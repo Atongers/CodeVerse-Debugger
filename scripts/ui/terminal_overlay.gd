@@ -114,6 +114,13 @@ func open_terminal(terminal_id: String, config: Dictionary, total_terminals: int
 	if player and "is_in_recharge_zone" in player:
 		player.is_in_recharge_zone = true
 
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", true, "terminal")
+		if am.has_method("play_ui"):
+			am.call("play_ui", "terminal_open")
+
 	_code_edit.grab_focus()
 
 
@@ -131,6 +138,12 @@ func close_terminal() -> void:
 		player.is_in_recharge_zone = false
 	_is_open = false
 	visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "terminal")
+		if am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_close")
 	terminal_closed.emit()
 
 
@@ -166,6 +179,10 @@ func _apply_locked_gutter_icons() -> void:
 
 
 func _on_code_text_changed() -> void:
+	if not _suppress_text_change:
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "code_type")
 	if _suppress_text_change or _locked_lines_map.is_empty():
 		return
 	var current_lines := _code_edit.text.split("\n")
@@ -212,8 +229,15 @@ func _on_run_pressed() -> void:
 		if player.energy < run_cost:
 			_output_rtl.clear()
 			_output_rtl.append_text("[color=#ef4444][b]BATERAI TIDAK CUKUP:[/b] Butuh minimal %d Energi untuk menguji kode (Tersisa: %d). Tunggu sejenak hingga energi beregenerasi![/color]" % [int(run_cost), int(player.energy)])
+			var am_err := get_node_or_null("/root/AudioManager")
+			if am_err and am_err.has_method("play_ui"):
+				am_err.call("play_ui", "code_error")
 			return
 		player.consume_energy(run_cost)
+
+	var am_run := get_node_or_null("/root/AudioManager")
+	if am_run and am_run.has_method("play_ui"):
+		am_run.call("play_ui", "code_run")
 
 	_saved_codes[_current_terminal_id] = _code_edit.text
 	_clear_line_highlights()
@@ -271,10 +295,17 @@ func _animate_execution(res: Dictionary) -> void:
 			level_action_triggered.emit(fn_name, arg0)
 
 		if not step_err.is_empty():
+			var am_err := get_node_or_null("/root/AudioManager")
+			if am_err and am_err.has_method("play_ui"):
+				am_err.call("play_ui", "code_error")
 			_output_rtl.append_text("\n[color=#f87171][b]❌ %s[/b][/color]\n" % step_err)
 			_is_running_steps = false
 			_run_btn.disabled = false
 			return
+
+		var am_step := get_node_or_null("/root/AudioManager")
+		if am_step and am_step.has_method("play_ui"):
+			am_step.call("play_ui", "code_step")
 
 		if _step_delay > 0.0:
 			await get_tree().create_timer(_step_delay).timeout
@@ -330,9 +361,15 @@ func _evaluate_terminal_goal(res: Dictionary) -> void:
 	if req_print:
 		if outputs.is_empty():
 			_output_rtl.append_text("\n[color=#fb923c][b]⚠️ Belum Sesuai Target:[/b] Kamu belum mencetak status dengan [code]print()[/code].[/color]\n")
+			var am_e1 := get_node_or_null("/root/AudioManager")
+			if am_e1 and am_e1.has_method("play_ui"):
+				am_e1.call("play_ui", "code_error")
 			return
 		if not expected_print.is_empty() and not outputs.has(expected_print):
 			_output_rtl.append_text("\n[color=#fb923c][b]⚠️ Belum Sesuai Target:[/b] Hasil [code]print()[/code] adalah '%s', seharusnya '%s'.[/color]\n" % [str(outputs[0]), expected_print])
+			var am_e2 := get_node_or_null("/root/AudioManager")
+			if am_e2 and am_e2.has_method("play_ui"):
+				am_e2.call("play_ui", "code_error")
 			return
 
 	var matched_call := false
@@ -346,6 +383,9 @@ func _evaluate_terminal_goal(res: Dictionary) -> void:
 
 	if not matched_call:
 		_output_rtl.append_text("\n[color=#fb923c][b]⚠️ Belum Sesuai Target:[/b] Fungsi [code]%s()[/code] belum dipanggil.[/color]\n" % req_call)
+		var am_e3 := get_node_or_null("/root/AudioManager")
+		if am_e3 and am_e3.has_method("play_ui"):
+			am_e3.call("play_ui", "code_error")
 		return
 
 	if typeof(actual_arg) != typeof(expected_arg) or actual_arg != expected_arg:
@@ -354,9 +394,15 @@ func _evaluate_terminal_goal(res: Dictionary) -> void:
 			"\n[color=#fb923c][b]⚠️ Bug Logika Terdeteksi:[/b]\nFungsi [code]%s(%s)[/code] menerima nilai [b]%s[/b], padahal target yang dibutuhkan adalah [b]%s[/b].\n💡 %s[/color]\n"
 			% [req_call, str(actual_arg), str(actual_arg), str(expected_arg), fail_reason]
 		)
+		var am_e4 := get_node_or_null("/root/AudioManager")
+		if am_e4 and am_e4.has_method("play_ui"):
+			am_e4.call("play_ui", "code_error")
 		return
 
 	# Success!
+	var am_ok := get_node_or_null("/root/AudioManager")
+	if am_ok and am_ok.has_method("play_ui"):
+		am_ok.call("play_ui", "code_solved")
 	for i in range(_code_edit.get_line_count()):
 		if not _locked_lines_map.has(i):
 			_code_edit.set_line_background_color(i, Color(0.15, 0.75, 0.35, 0.3))
@@ -388,6 +434,9 @@ func _on_hint_pressed() -> void:
 	cur_lvl = mini(cur_lvl + 1, 3)
 	_hint_levels[_current_terminal_id] = cur_lvl
 	_update_hint_display(cur_lvl)
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "lint_hint")
 
 
 func _update_hint_display(hint_lvl: int) -> void:
@@ -600,6 +649,9 @@ func _build_ui() -> void:
 	_speed_skip_btn.toggle_mode = true
 	_speed_skip_btn.pressed.connect(func(): _set_speed(0.0, _speed_skip_btn))
 	footer_hbox.add_child(_speed_skip_btn)
+
+	for b in [_close_btn, _run_btn, _reset_btn, _hint_btn, _insert_print_btn, _speed_1x_btn, _speed_2x_btn, _speed_skip_btn]:
+		UiPixelTheme.attach_button_sfx(b)
 
 	_refresh_tool_gating()
 

@@ -36,6 +36,12 @@ func start_cutscene() -> void:
 	_is_open = true
 	visible = true
 	_refresh_slide()
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "all")
+		if am.has_method("play_bgm"):
+			am.call("play_bgm", "cutscene", 0.6)
 	if is_instance_valid(_next_btn):
 		_next_btn.grab_focus()
 
@@ -188,6 +194,9 @@ func _finish_cutscene() -> void:
 		return
 	_is_open = false
 	visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_bgm"):
+		am.call("play_bgm", "world2", 0.8)
 	var sm: Node = get_node_or_null("/root/SaveManager")
 	if sm:
 		if sm.has_method("set_story_flag"):

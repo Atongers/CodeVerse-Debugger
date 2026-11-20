@@ -194,6 +194,9 @@ func _on_cone_body_entered(body: Node2D) -> void:
 		_tracked_player = body
 		if _has_line_of_sight(body):
 			_set_alarm(true)
+			var am := get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_sfx"):
+				am.call("play_sfx", "turret_scan_alert")
 			alarm_triggered.emit(body)
 			if _zap_timer <= 0.0 and body.has_method("take_damage"):
 				body.take_damage(zap_damage, "scanner")

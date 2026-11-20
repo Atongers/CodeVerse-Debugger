@@ -184,6 +184,7 @@ func _physics_process(delta: float) -> void:
 			if dist_to_player < 38.0 and _lunge_telegraph <= 0.0 and _attack_cd <= 0.0:
 				_lunge_telegraph = 0.35
 				_attack_cd = 1.4
+				_play_sfx("hound_telegraph", 0.05)
 			if _lunge_telegraph > 0.0:
 				_lunge_telegraph -= delta
 				velocity = to_player.normalized() * (move_speed * 2.1 if _lunge_telegraph <= 0.1 else 15.0)
@@ -263,6 +264,7 @@ func _spawn_energy_orb(dir: Vector2, speed_px: float, dmg: float) -> void:
 	orb.add_child(core_rect)
 
 	parent_node.add_child(orb)
+	_play_sfx("drone_shoot", 0.05)
 	var target_pos := orb.global_position + dir * (speed_px * 1.8)
 	var hit_state := {"done": false}
 	orb.body_entered.connect(func(b: Node2D) -> void:
@@ -316,12 +318,14 @@ func on_emp_hit(origin: Vector2, radius: float, damage: float, stun_duration: fl
 			if sm and sm.has_method("unlock_achievement"):
 				sm.call("unlock_achievement", "ACH-11")
 			_stun_timer = maxf(_stun_timer, stun_duration)
+			_play_sfx("emp_tier2_break")
 			_refresh_labels()
 		else:
 			if _shield_dome:
 				_shield_dome.modulate = Color(1.4, 1.4, 1.8)
 				var tw := create_tween()
 				tw.tween_property(_shield_dome, "modulate", Color.WHITE, 0.2)
+			_play_sfx("shield_clang", 0.04)
 			_refresh_labels()
 		return
 
@@ -338,6 +342,7 @@ func on_emp_hit(origin: Vector2, radius: float, damage: float, stun_duration: fl
 
 	if hp <= 0.0:
 		_is_dead = true
+		_play_sfx("enemy_defeat")
 		var sm: Node = get_node_or_null("/root/SaveManager")
 		if sm and sm.has_method("record_emp_kill"):
 			sm.call("record_emp_kill")
@@ -345,3 +350,13 @@ func on_emp_hit(origin: Vector2, radius: float, damage: float, stun_duration: fl
 			sm.call("set_quest_flag", "sentinel_defeated", true)
 		enemy_defeated.emit(self, enemy_type, global_position)
 		queue_free()
+	else:
+		_play_sfx("enemy_stun", 0.05)
+
+
+func _play_sfx(sfx_id: String, pitch_jitter: float = 0.0) -> void:
+	if Engine.is_editor_hint():
+		return
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.call("play_sfx", sfx_id, pitch_jitter)

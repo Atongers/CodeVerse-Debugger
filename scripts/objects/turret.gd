@@ -250,6 +250,10 @@ func _on_body_entered(body: Node2D) -> void:
 	if body is CharacterBody2D or body.name.to_lower().contains("dex"):
 		_tracked_target = body
 		theme_color = ColorTheme.ALERT_RED
+		if not Engine.is_editor_hint():
+			var am := get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_sfx"):
+				am.call("play_sfx", "turret_scan_alert")
 		target_detected.emit(body)
 
 

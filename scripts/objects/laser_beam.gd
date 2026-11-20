@@ -71,6 +71,13 @@ func _ready() -> void:
 			body_entered.connect(_on_body_entered)
 
 
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "laser_hum", get_instance_id(), "laser_hum", false, -14.0)
+
+
 func _process(delta: float) -> void:
 	if not Engine.is_editor_hint() and cyclic_enabled and not _permanently_disabled:
 		_cycle_timer += delta
@@ -79,6 +86,16 @@ func _process(delta: float) -> void:
 		var should_be_active := phase < cycle_on_duration
 		if should_be_active != is_active:
 			is_active = should_be_active
+
+	if not Engine.is_editor_hint():
+		var near_active := false
+		if is_active and is_inside_tree():
+			var player := get_tree().get_first_node_in_group("player") as Node2D
+			if player and player.global_position.distance_to(global_position) <= 220.0:
+				near_active = true
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "laser_hum", get_instance_id(), "laser_hum", near_active, -14.0)
 
 	if not is_active:
 		return
@@ -97,11 +114,16 @@ func _process(delta: float) -> void:
 
 
 func set_active(active: bool) -> void:
+	var was_active := is_active
 	if not active:
 		_permanently_disabled = true
 		cyclic_enabled = false
 		erratic_bug_mode = false
 		modulate = Color.WHITE
+		if was_active and not Engine.is_editor_hint() and is_inside_tree():
+			var am := get_node_or_null("/root/AudioManager")
+			if am and am.has_method("play_sfx"):
+				am.call("play_sfx", "laser_off")
 	else:
 		_permanently_disabled = false
 	is_active = active

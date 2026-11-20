@@ -63,6 +63,13 @@ func _ready() -> void:
 	_apply_step(0)
 
 
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "elevator_move", get_instance_id(), "elevator_move", false, -13.0)
+
+
 func _process(_delta: float) -> void:
 	var active_offsets := jammed_step_offsets if (not is_active and jammed_mode and jammed_step_offsets.size() > 0) else step_offsets
 	var count := maxi(1, active_offsets.size())
@@ -70,6 +77,16 @@ func _process(_delta: float) -> void:
 	if step != _last_step:
 		_last_step = step
 		_apply_step(step)
+
+	if not Engine.is_editor_hint() and is_inside_tree():
+		var near_active := false
+		if is_active or jammed_mode:
+			var player := get_tree().get_first_node_in_group("player") as Node2D
+			if player and player.global_position.distance_to(global_position) <= 240.0:
+				near_active = true
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("set_loop_user_active"):
+			am.call("set_loop_user_active", "elevator_move", get_instance_id(), "elevator_move", near_active, -13.0)
 
 
 func _physics_process(delta: float) -> void:

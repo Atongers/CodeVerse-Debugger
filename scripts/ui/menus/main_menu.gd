@@ -77,10 +77,20 @@ func _ready() -> void:
 			sm_init.call("end_w2_sandbox_if_active")
 	_ensure_audio_buses()
 	_load_user_settings()
+	var am := get_node_or_null("/root/AudioManager")
+	if am:
+		if am.has_method("stop_all_loops"):
+			am.call("stop_all_loops")
+		if am.has_method("set_ducking"):
+			am.call("set_ducking", false, "all")
+		if am.has_method("stop_ambience"):
+			am.call("stop_ambience", 0.5)
+		if am.has_method("play_bgm"):
+			am.call("play_bgm", "main_menu", 0.8)
 	_load_fonts()
 	_load_diorama_assets()
 	_build_ui()
-	_close_all_modals()
+	_close_all_modals(false)
 	if has_node("/root/SaveManager"):
 		var sm := get_node("/root/SaveManager")
 		if sm.has_signal("skin_changed") and not sm.skin_changed.is_connected(_on_save_skin_changed):
@@ -406,6 +416,7 @@ func _create_menu_button(label_text: String, accent_color: Color, icon_tex: Text
 	btn.custom_minimum_size = Vector2(330, 38)
 	btn.flat = true
 	btn.focus_mode = Control.FOCUS_ALL
+	UiPixelTheme.attach_button_sfx(btn)
 
 	var empty_sb := StyleBoxEmpty.new()
 	btn.add_theme_stylebox_override("normal", empty_sb)
@@ -806,6 +817,7 @@ func _rebuild_skin_selector_cards() -> void:
 		card.custom_minimum_size = Vector2(158, 60)
 		card.disabled = not unlocked
 		card.tooltip_text = str(meta.get("name", sid)) if unlocked else ("Terkunci: " + str(meta.get("unlock_hint", "")))
+		UiPixelTheme.attach_button_sfx(card)
 
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = Color(0.08, 0.12, 0.19, 0.96) if is_active else (Color(0.06, 0.08, 0.13, 0.9) if unlocked else Color(0.04, 0.05, 0.08, 0.85))
@@ -1344,6 +1356,7 @@ func _build_settings_modal() -> void:
 		_user_settings["fullscreen"] = toggled_on
 		_save_user_settings()
 	)
+	UiPixelTheme.attach_button_sfx(fs_check)
 	d_hbox.add_child(fs_check)
 
 	# Section 3: Cheatsheet Kontrol
@@ -1468,6 +1481,10 @@ func _build_settings_modal() -> void:
 
 
 func _ensure_audio_buses() -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("ensure_audio_buses"):
+		am.call("ensure_audio_buses")
+		return
 	for bus_name in ["BGM", "SFX"]:
 		if AudioServer.get_bus_index(bus_name) == -1:
 			var idx := AudioServer.get_bus_count()
@@ -1477,6 +1494,10 @@ func _ensure_audio_buses() -> void:
 
 
 func _apply_bus_volume(bus_name: String, pct: float) -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("apply_bus_volume"):
+		am.call("apply_bus_volume", bus_name, pct)
+		return
 	var bus_idx := AudioServer.get_bus_index(bus_name)
 	if bus_idx < 0:
 		return
@@ -1485,21 +1506,31 @@ func _apply_bus_volume(bus_name: String, pct: float) -> void:
 
 
 func _load_user_settings() -> void:
-	var cfg := ConfigFile.new()
-	if cfg.load(SETTINGS_PATH) == OK:
-		_user_settings["master_vol"] = int(cfg.get_value("audio", "master_vol", 80))
-		_user_settings["bgm_vol"] = int(cfg.get_value("audio", "bgm_vol", 75))
-		_user_settings["sfx_vol"] = int(cfg.get_value("audio", "sfx_vol", 85))
-		_user_settings["fullscreen"] = bool(cfg.get_value("display", "fullscreen", false))
-
-	_apply_bus_volume("Master", float(_user_settings["master_vol"]))
-	_apply_bus_volume("BGM", float(_user_settings["bgm_vol"]))
-	_apply_bus_volume("SFX", float(_user_settings["sfx_vol"]))
-	if bool(_user_settings["fullscreen"]):
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("load_user_settings"):
+		_user_settings = am.call("load_user_settings")
+	else:
+		var cfg := ConfigFile.new()
+		if cfg.load(SETTINGS_PATH) == OK:
+			_user_settings["master_vol"] = int(cfg.get_value("audio", "master_vol", 80))
+			_user_settings["bgm_vol"] = int(cfg.get_value("audio", "bgm_vol", 75))
+			_user_settings["sfx_vol"] = int(cfg.get_value("audio", "sfx_vol", 85))
+			_user_settings["fullscreen"] = bool(cfg.get_value("display", "fullscreen", false))
+		_apply_bus_volume("Master", float(_user_settings["master_vol"]))
+		_apply_bus_volume("BGM", float(_user_settings["bgm_vol"]))
+		_apply_bus_volume("SFX", float(_user_settings["sfx_vol"]))
+	if bool(_user_settings.get("fullscreen", false)):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 
 func _save_user_settings() -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("set_setting"):
+		am.call("set_setting", "master_vol", int(_user_settings.get("master_vol", 80)), false)
+		am.call("set_setting", "bgm_vol", int(_user_settings.get("bgm_vol", 75)), false)
+		am.call("set_setting", "sfx_vol", int(_user_settings.get("sfx_vol", 85)), false)
+		am.call("set_setting", "fullscreen", bool(_user_settings.get("fullscreen", false)), true)
+		return
 	var cfg := ConfigFile.new()
 	cfg.set_value("audio", "master_vol", int(_user_settings.get("master_vol", 80)))
 	cfg.set_value("audio", "bgm_vol", int(_user_settings.get("bgm_vol", 75)))
@@ -1641,6 +1672,9 @@ func _open_modal(modal: PanelContainer) -> void:
 		_modal_dimmer.visible = true
 	if modal:
 		modal.visible = true
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_open")
 		var close_btn: Button = modal.find_child("CloseButton", true, false) as Button
 		if close_btn:
 			close_btn.call_deferred("grab_focus")
@@ -1667,6 +1701,12 @@ func _on_quit_pressed() -> void:
 
 
 func _close_all_modals(restore_focus: bool = true) -> void:
+	var had_open := (
+		(_level_select_modal and _level_select_modal.visible)
+		or (_bug_log_modal and _bug_log_modal.visible)
+		or (_achievements_modal and _achievements_modal.visible)
+		or (_settings_modal and _settings_modal.visible)
+	)
 	if _modal_dimmer:
 		_modal_dimmer.visible = false
 	if _level_select_modal:
@@ -1677,6 +1717,10 @@ func _close_all_modals(restore_focus: bool = true) -> void:
 		_achievements_modal.visible = false
 	if _settings_modal:
 		_settings_modal.visible = false
+	if had_open and restore_focus:
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_ui"):
+			am.call("play_ui", "ui_modal_close")
 	if restore_focus and is_instance_valid(_last_focused_button):
 		_last_focused_button.call_deferred("grab_focus")
 		_last_focused_button = null

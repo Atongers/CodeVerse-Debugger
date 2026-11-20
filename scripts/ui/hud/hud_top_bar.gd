@@ -339,6 +339,9 @@ func open_pause_popup() -> void:
 	if not _pause_dimmer:
 		return
 	_pause_dimmer.visible = true
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_open")
 	if _dex_ref:
 		if "controls_enabled" in _dex_ref:
 			_dex_ref.controls_enabled = false
@@ -352,6 +355,9 @@ func close_pause_popup() -> void:
 	if not _pause_dimmer or not _pause_dimmer.visible:
 		return
 	_pause_dimmer.visible = false
+	var am := get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_ui"):
+		am.call("play_ui", "ui_modal_close")
 	if _dex_ref and "controls_enabled" in _dex_ref:
 		_dex_ref.controls_enabled = true
 

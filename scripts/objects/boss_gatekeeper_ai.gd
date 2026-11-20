@@ -143,6 +143,10 @@ func _fire_boss_laser_orb(dir: Vector2) -> void:
 	orb.add_child(inner_r)
 
 	parent_node.add_child(orb)
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.call("play_sfx", "boss_laser_shot", 0.04)
 	var target_pos := orb.global_position + dir * 230.0
 	var hit_state := {"done": false}
 	orb.body_entered.connect(func(b: Node2D) -> void:
@@ -175,9 +179,17 @@ func advance_to_overheat_phase() -> void:
 	phase = 1
 	subnode_ready = true
 	_refresh_visuals()
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.call("play_sfx", "boss_overheat")
 
 
 func advance_to_restored_phase() -> void:
 	phase = 2
 	_refresh_visuals()
+	if not Engine.is_editor_hint():
+		var am := get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.call("play_sfx", "boss_restored")
 	boss_restored.emit()

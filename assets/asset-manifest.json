@@ -6,327 +6,2526 @@
     {
       "path": "res://assets/sprites/objects/exit_gate_sheet.png",
       "category": "object",
-      "size_px": [96, 48],
-      "frame_px": [32, 48],
+      "size_px": [
+        96,
+        48
+      ],
+      "frame_px": [
+        32,
+        48
+      ],
       "frames": 3,
-      "states": ["locked_error_red", "locked_blink_yellow", "unlocked_cyan_green"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "states": [
+        "locked_error_red",
+        "locked_blink_yellow",
+        "unlocked_cyan_green"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/objects/floor_spike_sheet.png",
       "category": "object",
-      "size_px": [48, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        48,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 3,
-      "states": ["standard", "staggered_variant", "powered_hazard"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "states": [
+        "standard",
+        "staggered_variant",
+        "powered_hazard"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/environment/wiring_cables_sheet.png",
       "category": "environment",
-      "size_px": [96, 48],
-      "frame_px": [16, 16],
-      "grid": [6, 3],
-      "states": ["neutral_off", "bug_active_error", "solved_cyan_green"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "size_px": [
+        96,
+        48
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "grid": [
+        6,
+        3
+      ],
+      "states": [
+        "neutral_off",
+        "bug_active_error",
+        "solved_cyan_green"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/environment/sector_props_sheet.png",
       "category": "environment",
-      "size_px": [128, 64],
-      "frame_px": [16, 16],
-      "grid": [8, 4],
-      "sectors": ["sector_1_dek_bawah", "sector_2_menara_kontrol", "sector_3_terowongan_reaktor", "extra_connectors"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "size_px": [
+        128,
+        64
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "grid": [
+        8,
+        4
+      ],
+      "sectors": [
+        "sector_1_dek_bawah",
+        "sector_2_menara_kontrol",
+        "sector_3_terowongan_reaktor",
+        "extra_connectors"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/vfx/vfx_dust_cyan.png",
       "category": "vfx",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/vfx/vfx_spark_error.png",
       "category": "vfx",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/vfx/vfx_energy_solved.png",
       "category": "vfx",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_status_icons_sheet.png",
       "category": "ui",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "icons": ["error_x", "success_check", "active_highlight", "tab_overview_camera"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "icons": [
+        "error_x",
+        "success_check",
+        "active_highlight",
+        "tab_overview_camera"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_debug_tools_sheet.png",
       "category": "ui",
-      "size_px": [128, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        128,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 8,
-      "icons": ["output_terminal", "print_log", "step_trace", "watch_var", "breakpoint", "locked_line", "hint_lint", "bug_log"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "icons": [
+        "output_terminal",
+        "print_log",
+        "step_trace",
+        "watch_var",
+        "breakpoint",
+        "locked_line",
+        "hint_lint",
+        "bug_log"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_terminal_controls_sheet.png",
       "category": "ui",
-      "size_px": [96, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        96,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 6,
-      "icons": ["run", "reset", "speed_1x", "speed_2x", "skip", "close"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "icons": [
+        "run",
+        "reset",
+        "speed_1x",
+        "speed_2x",
+        "skip",
+        "close"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_panel_frames_sheet.png",
       "category": "ui",
-      "size_px": [96, 48],
-      "frame_px": [48, 48],
+      "size_px": [
+        96,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
       "frames": 2,
-      "variants": ["panel_steel_dark", "panel_cyan_focus"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "variants": [
+        "panel_steel_dark",
+        "panel_cyan_focus"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_line_status_sheet.png",
       "category": "ui",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "icons": ["line_locked", "line_running_yellow", "line_error_red", "line_success_green"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "icons": [
+        "line_locked",
+        "line_running_yellow",
+        "line_error_red",
+        "line_success_green"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_world_badges_sheet.png",
       "category": "ui",
-      "size_px": [96, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        96,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 6,
-      "worlds": ["world_0_tutorial", "world_1_syntax_shore", "world_2_condition_canyon", "world_3_loop_labyrinth", "world_4_function_foundry", "world_5_list_citadel"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "worlds": [
+        "world_0_tutorial",
+        "world_1_syntax_shore",
+        "world_2_condition_canyon",
+        "world_3_loop_labyrinth",
+        "world_4_function_foundry",
+        "world_5_list_citadel"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/characters/lint_companion_sheet.png",
       "category": "character",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "states": ["idle", "hint_thinking", "happy_solved", "alert_error"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "states": [
+        "idle",
+        "hint_thinking",
+        "happy_solved",
+        "alert_error"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/characters/dex_skin_default.png",
       "category": "character",
-      "size_px": [256, 192],
-      "frame_px": [32, 32],
-      "grid": [8, 6],
+      "size_px": [
+        256,
+        192
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        8,
+        6
+      ],
       "frames": 24,
       "skin_id": "cyan_debugger",
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/characters/dex_skin_volt_scout.png",
       "category": "character",
-      "size_px": [256, 192],
-      "frame_px": [32, 32],
-      "grid": [8, 6],
+      "size_px": [
+        256,
+        192
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        8,
+        6
+      ],
       "frames": 24,
       "skin_id": "volt_scout",
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/characters/dex_skin_plasma_sentinel.png",
       "category": "character",
-      "size_px": [256, 192],
-      "frame_px": [32, 32],
-      "grid": [8, 6],
+      "size_px": [
+        256,
+        192
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        8,
+        6
+      ],
       "frames": 24,
       "skin_id": "plasma_sentinel",
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/skins/dex_skin_portraits.png",
       "category": "ui",
-      "size_px": [192, 64],
-      "frame_px": [64, 64],
+      "size_px": [
+        192,
+        64
+      ],
+      "frame_px": [
+        64,
+        64
+      ],
       "frames": 3,
-      "variants": ["cyan_debugger", "volt_scout", "plasma_sentinel"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "variants": [
+        "cyan_debugger",
+        "volt_scout",
+        "plasma_sentinel"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/skins/dex_skin_badges.png",
       "category": "ui",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "icons": ["cyan_debugger", "volt_scout", "plasma_sentinel", "locked"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "icons": [
+        "cyan_debugger",
+        "volt_scout",
+        "plasma_sentinel",
+        "locked"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/sprites/vfx/vfx_sprint_trail.png",
       "category": "vfx",
-      "size_px": [64, 16],
-      "frame_px": [16, 16],
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
       "frames": 4,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_tools_24_sheet.png",
       "category": "ui",
-      "size_px": [168, 48],
-      "frame_px": [24, 24],
-      "grid": [7, 2],
-      "icons": ["output_terminal", "print_tool", "step_trace", "watch_var", "breakpoint", "speed_2x_skip", "bug_log"],
-      "rows": ["unlocked", "locked_silhouette"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "size_px": [
+        168,
+        48
+      ],
+      "frame_px": [
+        24,
+        24
+      ],
+      "grid": [
+        7,
+        2
+      ],
+      "icons": [
+        "output_terminal",
+        "print_tool",
+        "step_trace",
+        "watch_var",
+        "breakpoint",
+        "speed_2x_skip",
+        "bug_log"
+      ],
+      "rows": [
+        "unlocked",
+        "locked_silhouette"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_dock_frame_9slice.png",
       "category": "ui",
-      "size_px": [48, 48],
+      "size_px": [
+        48,
+        48
+      ],
       "nine_slice_margin_px": 12,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_tool_slot_sheet.png",
       "category": "ui",
-      "size_px": [128, 32],
-      "frame_px": [32, 32],
+      "size_px": [
+        128,
+        32
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
       "frames": 4,
-      "states": ["locked", "unlocked", "active_hover", "new_shimmer"],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "states": [
+        "locked",
+        "unlocked",
+        "active_hover",
+        "new_shimmer"
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_unlock_toast_9slice.png",
       "category": "ui",
-      "size_px": [64, 48],
+      "size_px": [
+        64,
+        48
+      ],
       "nine_slice_margin_px": 14,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_lock_feature_24.png",
       "category": "ui",
-      "size_px": [24, 24],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "size_px": [
+        24,
+        24
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_lock_codeline_16.png",
       "category": "ui",
-      "size_px": [16, 16],
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "size_px": [
+        16,
+        16
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
     {
       "path": "res://assets/ui/ui_lock_open_anim.png",
       "category": "ui",
-      "size_px": [96, 24],
-      "frame_px": [24, 24],
+      "size_px": [
+        96,
+        24
+      ],
+      "frame_px": [
+        24,
+        24
+      ],
       "frames": 4,
-      "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" },
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
       "license": "project-internal",
       "technical_checks_passed": true
     },
-    { "path": "res://assets/ui/rework/ui_modal_frame_9slice.png", "category": "ui", "size_px": [64, 64], "nine_slice_margin_px": 16, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_card_frames_sheet.png", "category": "ui", "size_px": [144, 48], "frame_px": [48, 48], "frames": 3, "nine_slice_margin_px": 10, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_btn_pixel_9slice_sheet.png", "category": "ui", "size_px": [128, 96], "frame_px": [32, 32], "grid": [4, 3], "nine_slice_margin_px": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_btn_close_sheet.png", "category": "ui", "size_px": [72, 24], "frame_px": [24, 24], "frames": 3, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_hud_containers_sheet.png", "category": "ui", "size_px": [96, 48], "frame_px": [48, 48], "frames": 2, "nine_slice_margin_px": 10, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_hud_vital_bars_sheet.png", "category": "ui", "size_px": [96, 64], "frame_px": [32, 32], "grid": [3, 2], "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_hud_icons_16_sheet.png", "category": "ui", "size_px": [128, 16], "frame_px": [16, 16], "frames": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_level_state_icons_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [16, 16], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_bug_tags_sheet.png", "category": "ui", "size_px": [80, 16], "frame_px": [16, 16], "frames": 5, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_code_diff_box_9slice.png", "category": "ui", "size_px": [64, 32], "frame_px": [32, 32], "frames": 2, "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_settings_icons_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [16, 16], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_slider_track_9slice.png", "category": "ui", "size_px": [64, 16], "frame_px": [32, 16], "frames": 2, "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_slider_grabber_sheet.png", "category": "ui", "size_px": [32, 16], "frame_px": [16, 16], "frames": 2, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_toggle_switch_sheet.png", "category": "ui", "size_px": [64, 16], "frame_px": [32, 16], "frames": 2, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/ui/rework/ui_keycap_9slice.png", "category": "ui", "size_px": [24, 24], "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/story/story_w2_cutscene_slides.png", "category": "story", "size_px": [1920, 360], "frame_px": [640, 360], "frames": 3, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/story/story_lint_portrait_48.png", "category": "story", "size_px": [192, 48], "frame_px": [48, 48], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/dex_topdown_default.png", "category": "character", "size_px": [384, 288], "frame_px": [48, 48], "grid": [8, 6], "frames": 48, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/dex_topdown_volt_scout.png", "category": "character", "size_px": [384, 288], "frame_px": [48, 48], "grid": [8, 6], "frames": 48, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/dex_topdown_plasma_sentinel.png", "category": "character", "size_px": [384, 288], "frame_px": [48, 48], "grid": [8, 6], "frames": 48, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/environment/world2_canyon_tileset.png", "category": "environment", "size_px": [256, 256], "tile_px": [16, 16], "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/environment/world2_buildings_props_sheet.png", "category": "environment", "size_px": [384, 256], "tile_px": [16, 16], "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/objects/world2_condition_objects_sheet.png", "category": "object", "size_px": [192, 128], "frame_px": [32, 32], "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/environment/world2_atmosphere_fx_sheet.png", "category": "environment", "size_px": [128, 64], "tile_px": [16, 16], "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/npc_canyon_robots_sheet.png", "category": "character", "size_px": [192, 144], "frame_px": [48, 48], "grid": [4, 3], "frames": 12, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/npc_canyon_portraits_48.png", "category": "ui", "size_px": [192, 48], "frame_px": [48, 48], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_dialog_rpg_kit.png", "category": "ui", "size_px": [96, 48], "nine_slice_margin_px": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_quest_emotes_16.png", "category": "ui", "size_px": [96, 16], "frame_px": [16, 16], "frames": 6, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/enemy_scrap_hound_sheet.png", "category": "character", "size_px": [192, 144], "frame_px": [48, 48], "grid": [4, 3], "frames": 12, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/enemy_patrol_drone_sheet.png", "category": "character", "size_px": [192, 96], "frame_px": [48, 48], "grid": [4, 2], "frames": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/enemy_shield_sentinel_sheet.png", "category": "character", "size_px": [192, 144], "frame_px": [48, 48], "grid": [4, 3], "frames": 12, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/vfx/vfx_combat_and_shield_32.png", "category": "vfx", "size_px": [192, 96], "frame_px": [48, 48], "grid": [4, 2], "frames": 8, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/objects/world2_workbench_station_sheet.png", "category": "object", "size_px": [256, 64], "frame_px": [64, 64], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/items/world2_crafting_items_16_sheet.png", "category": "item", "size_px": [192, 32], "frame_px": [16, 16], "grid": [12, 2], "frames": 24, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_scrap_bit_coin_16.png", "category": "ui", "size_px": [64, 16], "frame_px": [16, 16], "frames": 4, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_upgrade_tree_nodes_32.png", "category": "ui", "size_px": [192, 64], "frame_px": [32, 32], "grid": [6, 2], "frames": 12, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_tree_node_frame_sheet.png", "category": "ui", "size_px": [144, 48], "frame_px": [48, 48], "frames": 3, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/characters/boss_gatekeeper_ai_sheet.png", "category": "character", "size_px": [384, 288], "frame_px": [96, 96], "grid": [4, 3], "frames": 12, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true },
-    { "path": "res://assets/world_2/ui/ui_achievement_badges_24_sheet.png", "category": "ui", "size_px": [288, 48], "frame_px": [24, 24], "grid": [12, 2], "frames": 24, "source": { "kind": "procedural_pixel_art", "tool": "python-pillow" }, "license": "project-internal", "technical_checks_passed": true }
+    {
+      "path": "res://assets/ui/rework/ui_modal_frame_9slice.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        64
+      ],
+      "nine_slice_margin_px": 16,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_card_frames_sheet.png",
+      "category": "ui",
+      "size_px": [
+        144,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "frames": 3,
+      "nine_slice_margin_px": 10,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_btn_pixel_9slice_sheet.png",
+      "category": "ui",
+      "size_px": [
+        128,
+        96
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        4,
+        3
+      ],
+      "nine_slice_margin_px": 8,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_btn_close_sheet.png",
+      "category": "ui",
+      "size_px": [
+        72,
+        24
+      ],
+      "frame_px": [
+        24,
+        24
+      ],
+      "frames": 3,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_hud_containers_sheet.png",
+      "category": "ui",
+      "size_px": [
+        96,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "frames": 2,
+      "nine_slice_margin_px": 10,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_hud_vital_bars_sheet.png",
+      "category": "ui",
+      "size_px": [
+        96,
+        64
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        3,
+        2
+      ],
+      "nine_slice_margin_px": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_hud_icons_16_sheet.png",
+      "category": "ui",
+      "size_px": [
+        128,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 8,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_level_state_icons_sheet.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_bug_tags_sheet.png",
+      "category": "ui",
+      "size_px": [
+        80,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 5,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_code_diff_box_9slice.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        32
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "frames": 2,
+      "nine_slice_margin_px": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_settings_icons_sheet.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_slider_track_9slice.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        32,
+        16
+      ],
+      "frames": 2,
+      "nine_slice_margin_px": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_slider_grabber_sheet.png",
+      "category": "ui",
+      "size_px": [
+        32,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 2,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_toggle_switch_sheet.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        32,
+        16
+      ],
+      "frames": 2,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/ui/rework/ui_keycap_9slice.png",
+      "category": "ui",
+      "size_px": [
+        24,
+        24
+      ],
+      "nine_slice_margin_px": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/story/story_w2_cutscene_slides.png",
+      "category": "story",
+      "size_px": [
+        1920,
+        360
+      ],
+      "frame_px": [
+        640,
+        360
+      ],
+      "frames": 3,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/story/story_lint_portrait_48.png",
+      "category": "story",
+      "size_px": [
+        192,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/dex_topdown_default.png",
+      "category": "character",
+      "size_px": [
+        384,
+        288
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        8,
+        6
+      ],
+      "frames": 48,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/dex_topdown_volt_scout.png",
+      "category": "character",
+      "size_px": [
+        384,
+        288
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        8,
+        6
+      ],
+      "frames": 48,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/dex_topdown_plasma_sentinel.png",
+      "category": "character",
+      "size_px": [
+        384,
+        288
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        8,
+        6
+      ],
+      "frames": 48,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/environment/world2_canyon_tileset.png",
+      "category": "environment",
+      "size_px": [
+        256,
+        256
+      ],
+      "tile_px": [
+        16,
+        16
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/environment/world2_buildings_props_sheet.png",
+      "category": "environment",
+      "size_px": [
+        384,
+        256
+      ],
+      "tile_px": [
+        16,
+        16
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/objects/world2_condition_objects_sheet.png",
+      "category": "object",
+      "size_px": [
+        192,
+        128
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/environment/world2_atmosphere_fx_sheet.png",
+      "category": "environment",
+      "size_px": [
+        128,
+        64
+      ],
+      "tile_px": [
+        16,
+        16
+      ],
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/npc_canyon_robots_sheet.png",
+      "category": "character",
+      "size_px": [
+        192,
+        144
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        4,
+        3
+      ],
+      "frames": 12,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/npc_canyon_portraits_48.png",
+      "category": "ui",
+      "size_px": [
+        192,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_dialog_rpg_kit.png",
+      "category": "ui",
+      "size_px": [
+        96,
+        48
+      ],
+      "nine_slice_margin_px": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_quest_emotes_16.png",
+      "category": "ui",
+      "size_px": [
+        96,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 6,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/enemy_scrap_hound_sheet.png",
+      "category": "character",
+      "size_px": [
+        192,
+        144
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        4,
+        3
+      ],
+      "frames": 12,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/enemy_patrol_drone_sheet.png",
+      "category": "character",
+      "size_px": [
+        192,
+        96
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        4,
+        2
+      ],
+      "frames": 8,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/enemy_shield_sentinel_sheet.png",
+      "category": "character",
+      "size_px": [
+        192,
+        144
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        4,
+        3
+      ],
+      "frames": 12,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/vfx/vfx_combat_and_shield_32.png",
+      "category": "vfx",
+      "size_px": [
+        192,
+        96
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "grid": [
+        4,
+        2
+      ],
+      "frames": 8,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/objects/world2_workbench_station_sheet.png",
+      "category": "object",
+      "size_px": [
+        256,
+        64
+      ],
+      "frame_px": [
+        64,
+        64
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/items/world2_crafting_items_16_sheet.png",
+      "category": "item",
+      "size_px": [
+        192,
+        32
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "grid": [
+        12,
+        2
+      ],
+      "frames": 24,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_scrap_bit_coin_16.png",
+      "category": "ui",
+      "size_px": [
+        64,
+        16
+      ],
+      "frame_px": [
+        16,
+        16
+      ],
+      "frames": 4,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_upgrade_tree_nodes_32.png",
+      "category": "ui",
+      "size_px": [
+        192,
+        64
+      ],
+      "frame_px": [
+        32,
+        32
+      ],
+      "grid": [
+        6,
+        2
+      ],
+      "frames": 12,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_tree_node_frame_sheet.png",
+      "category": "ui",
+      "size_px": [
+        144,
+        48
+      ],
+      "frame_px": [
+        48,
+        48
+      ],
+      "frames": 3,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/characters/boss_gatekeeper_ai_sheet.png",
+      "category": "character",
+      "size_px": [
+        384,
+        288
+      ],
+      "frame_px": [
+        96,
+        96
+      ],
+      "grid": [
+        4,
+        3
+      ],
+      "frames": 12,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/world_2/ui/ui_achievement_badges_24_sheet.png",
+      "category": "ui",
+      "size_px": [
+        288,
+        48
+      ],
+      "frame_px": [
+        24,
+        24
+      ],
+      "grid": [
+        12,
+        2
+      ],
+      "frames": 24,
+      "source": {
+        "kind": "procedural_pixel_art",
+        "tool": "python-pillow"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/bgm_main_menu.ogg",
+      "category": "audio_bgm",
+      "bus": "BGM",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 72.0,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -14.5,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/bgm_world1_syntax_shore.ogg",
+      "category": "audio_bgm",
+      "bus": "BGM",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 78.55,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -13.4,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/bgm_story_cutscene.ogg",
+      "category": "audio_bgm",
+      "bus": "BGM",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 55.38,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -14.3,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/bgm_world2_condition_canyon.ogg",
+      "category": "audio_bgm",
+      "bus": "BGM",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 96.0,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -12.2,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/bgm_boss_gatekeeper.ogg",
+      "category": "audio_bgm",
+      "bus": "BGM",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 65.45,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -12.6,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/amb_lab_hum.ogg",
+      "category": "audio_ambience",
+      "bus": "Ambience",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 36.0,
+      "loop": true,
+      "integrated_lufs": -24.0,
+      "true_peak_dbtp": -17.9,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/bgm/amb_canyon_wind.ogg",
+      "category": "audio_ambience",
+      "bus": "Ambience",
+      "format": "ogg",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 38.0,
+      "loop": true,
+      "integrated_lufs": -24.2,
+      "true_peak_dbtp": -11.7,
+      "github_issue": "#20",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_achievement_toast.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.625,
+      "loop": false,
+      "integrated_lufs": -14.6,
+      "true_peak_dbtp": -3.6,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_boss_laser_shot.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.3,
+      "loop": false,
+      "integrated_lufs": -17.8,
+      "true_peak_dbtp": -3.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_boss_overheat.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.585,
+      "loop": false,
+      "integrated_lufs": -15.8,
+      "true_peak_dbtp": -3.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_boss_restored.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 1.05,
+      "loop": false,
+      "integrated_lufs": -14.4,
+      "true_peak_dbtp": -3.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_checkpoint_activate.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.4,
+      "loop": false,
+      "integrated_lufs": -14.9,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_error.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.315,
+      "loop": false,
+      "integrated_lufs": -11.9,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_run.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.21,
+      "loop": false,
+      "integrated_lufs": -14.4,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_solved.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.5,
+      "loop": false,
+      "integrated_lufs": -15.0,
+      "true_peak_dbtp": -3.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_step.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.068,
+      "loop": false,
+      "integrated_lufs": -17.6,
+      "true_peak_dbtp": -5.2,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_type_1.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.05,
+      "loop": false,
+      "integrated_lufs": -18.9,
+      "true_peak_dbtp": -5.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_type_2.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.05,
+      "loop": false,
+      "integrated_lufs": -18.7,
+      "true_peak_dbtp": -5.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_code_type_3.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.05,
+      "loop": false,
+      "integrated_lufs": -19.0,
+      "true_peak_dbtp": -5.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_crane_move.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 1.0,
+      "loop": true,
+      "integrated_lufs": -13.7,
+      "true_peak_dbtp": -5.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_collapse.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.54,
+      "loop": false,
+      "integrated_lufs": -17.3,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_hit.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.23,
+      "loop": false,
+      "integrated_lufs": -20.0,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_jump.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.16,
+      "loop": false,
+      "integrated_lufs": -14.7,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_land.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.11,
+      "loop": false,
+      "integrated_lufs": -19.5,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_sprint_whoosh.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.205,
+      "loop": false,
+      "integrated_lufs": -15.9,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_step_1.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -19.6,
+      "true_peak_dbtp": -5.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_step_2.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -21.0,
+      "true_peak_dbtp": -5.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_dex_step_3.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -17.0,
+      "true_peak_dbtp": -5.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_drone_shoot.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.175,
+      "loop": false,
+      "integrated_lufs": -14.0,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_elevator_move.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 1.0,
+      "loop": true,
+      "integrated_lufs": -11.8,
+      "true_peak_dbtp": -5.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_emp_pulse.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.34,
+      "loop": false,
+      "integrated_lufs": -19.2,
+      "true_peak_dbtp": -3.8,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_emp_tier2_break.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.47,
+      "loop": false,
+      "integrated_lufs": -22.2,
+      "true_peak_dbtp": -3.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_enemy_defeat.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.37,
+      "loop": false,
+      "integrated_lufs": -20.7,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_enemy_stun.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.29,
+      "loop": false,
+      "integrated_lufs": -13.4,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_exit_gate_open.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.625,
+      "loop": false,
+      "integrated_lufs": -15.0,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_hound_telegraph.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.25,
+      "loop": false,
+      "integrated_lufs": -13.0,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_laser_hum.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 1.4,
+      "loop": true,
+      "integrated_lufs": -12.3,
+      "true_peak_dbtp": -5.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_laser_off.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.27,
+      "loop": false,
+      "integrated_lufs": -18.2,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_level_victory.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 1.9,
+      "loop": false,
+      "integrated_lufs": -16.9,
+      "true_peak_dbtp": -3.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_lint_hint.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.27,
+      "loop": false,
+      "integrated_lufs": -13.2,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_loot_pickup_coin.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.15,
+      "loop": false,
+      "integrated_lufs": -15.9,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_loot_pickup_item.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.21,
+      "loop": false,
+      "integrated_lufs": -13.0,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_npc_blip_elder.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -12.6,
+      "true_peak_dbtp": -4.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_npc_blip_kael.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -11.3,
+      "true_peak_dbtp": -4.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_npc_blip_medic.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.078,
+      "loop": false,
+      "integrated_lufs": -13.0,
+      "true_peak_dbtp": -4.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_plasma_shoot.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.21,
+      "loop": false,
+      "integrated_lufs": -19.8,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_quest_complete.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.75,
+      "loop": false,
+      "integrated_lufs": -17.6,
+      "true_peak_dbtp": -3.6,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_quick_battery.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.315,
+      "loop": false,
+      "integrated_lufs": -13.6,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_quick_heal.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.315,
+      "loop": false,
+      "integrated_lufs": -16.1,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_shield_clang.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.205,
+      "loop": false,
+      "integrated_lufs": -19.7,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_terminal_open.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.25,
+      "loop": false,
+      "integrated_lufs": -15.4,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_turret_scan_alert.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.25,
+      "loop": false,
+      "integrated_lufs": -9.2,
+      "true_peak_dbtp": -4.2,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_ui_click.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.095,
+      "loop": false,
+      "integrated_lufs": -17.7,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_ui_hover.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.055,
+      "loop": false,
+      "integrated_lufs": -18.3,
+      "true_peak_dbtp": -5.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_ui_modal_close.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.16,
+      "loop": false,
+      "integrated_lufs": -16.7,
+      "true_peak_dbtp": -4.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_ui_modal_open.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.18,
+      "loop": false,
+      "integrated_lufs": -15.5,
+      "true_peak_dbtp": -4.5,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_unlock_item.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.45,
+      "loop": false,
+      "integrated_lufs": -15.1,
+      "true_peak_dbtp": -3.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_upgrade_buy.wav",
+      "category": "audio_sfx_ui",
+      "bus": "UI",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "duration_sec": 0.34,
+      "loop": false,
+      "integrated_lufs": -15.4,
+      "true_peak_dbtp": -3.8,
+      "github_issue": "#21",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    },
+    {
+      "path": "res://assets/audio/sfx/sfx_workbench_weld.wav",
+      "category": "audio_sfx_gameplay",
+      "bus": "SFX",
+      "format": "wav",
+      "sample_rate_hz": 44100,
+      "channels": 1,
+      "duration_sec": 0.54,
+      "loop": false,
+      "integrated_lufs": -20.3,
+      "true_peak_dbtp": -4.0,
+      "github_issue": "#22",
+      "source": {
+        "kind": "procedural_audio_synth",
+        "tool": "python-synth-ffmpeg"
+      },
+      "license": "project-internal",
+      "technical_checks_passed": true
+    }
   ]
 }
