@@ -31,8 +31,10 @@ var _npcs_map: Dictionary = {}
 var _lore_nodes: Dictionary = {}
 var _workbench_area: Area2D = null
 var _upgrade_area: Area2D = null
+var _substation_barrier: StaticBody2D = null
 var _overpass_barrier: StaticBody2D = null
 var _w3_gate_area: Area2D = null
+var _barrier_toast_cooldown_ms: int = 0
 
 # World 2 HUD & Dialog UI refs
 var _w2_bits_lbl: Label = null
@@ -203,6 +205,22 @@ func _build_city_environment() -> void:
 			for ty in range(16):
 				src.create_tile(Vector2i(tx, ty))
 		ts.add_source(src, 0)
+		ts.add_physics_layer()
+		ts.set_physics_layer_collision_layer(0, 1)
+		ts.set_physics_layer_collision_mask(0, 1)
+		var chasm_poly := PackedVector2Array([
+			Vector2(-8.0, -8.0),
+			Vector2(8.0, -8.0),
+			Vector2(8.0, 8.0),
+			Vector2(-8.0, 8.0),
+		])
+		for chasm_x in range(4):
+			var chasm_coord := Vector2i(chasm_x, 9)
+			if src.has_tile(chasm_coord):
+				var td: TileData = src.get_tile_data(chasm_coord, 0)
+				if td:
+					td.set_collision_polygons_count(0, 1)
+					td.set_collision_polygon_points(0, 0, chasm_poly)
 		terrain.tile_set = ts
 
 		# Paint full canyon sand ground, cobblestone roads, canyon chasm, and steel bridge across 5 districts
@@ -266,6 +284,80 @@ func _build_city_environment() -> void:
 	# District 5: Canyon Overpass & Boss Arena
 	_spawn_building_prop(props_root, "Signpost_Boss", Rect2(288, 112, 96, 76), Vector2(1590, 560))
 
+	_build_perimeter_and_substation_fences()
+
+
+func _add_solid_footprint(parent: Node2D, size_vec: Vector2, offset_pos: Vector2 = Vector2.ZERO) -> StaticBody2D:
+	var body := StaticBody2D.new()
+	body.name = "SolidFootprint"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	var col := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size_vec
+	col.shape = rect
+	col.position = offset_pos
+	body.add_child(col)
+	parent.add_child(body)
+	return body
+
+
+func _build_perimeter_and_substation_fences() -> void:
+	var walls := Node2D.new()
+	walls.name = "WorldPerimeterWalls"
+	add_child(walls)
+
+	var bounds := [
+		["WallLeft", Vector2(-8.0, 640.0), Vector2(16.0, 1312.0)],
+		["WallRight", Vector2(1928.0, 640.0), Vector2(16.0, 1312.0)],
+		["WallTop", Vector2(960.0, -8.0), Vector2(1952.0, 16.0)],
+		["WallBottom", Vector2(960.0, 1288.0), Vector2(1952.0, 16.0)],
+	]
+	for b in bounds:
+		var wall := StaticBody2D.new()
+		wall.name = str(b[0])
+		wall.position = b[1] as Vector2
+		wall.collision_layer = 1
+		wall.collision_mask = 0
+		var col := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = b[2] as Vector2
+		col.shape = rect
+		wall.add_child(col)
+		walls.add_child(wall)
+
+	# District 2/3 -> District 4 cliff & fence divider at x = 980 (road opening y = 592..720)
+	var divider := Node2D.new()
+	divider.name = "SubstationBorderWalls"
+	add_child(divider)
+	var segments := [
+		["SubstationWallNorth", Vector2(980.0, 296.0), Vector2(24.0, 592.0)],
+		["SubstationWallSouth", Vector2(980.0, 1000.0), Vector2(24.0, 560.0)],
+	]
+	for seg in segments:
+		var sb := StaticBody2D.new()
+		sb.name = str(seg[0])
+		sb.position = seg[1] as Vector2
+		sb.collision_layer = 1
+		sb.collision_mask = 0
+		var s_size: Vector2 = seg[2] as Vector2
+		var col := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = s_size
+		col.shape = rect
+		sb.add_child(col)
+		var visual := ColorRect.new()
+		visual.size = Vector2(14.0, s_size.y)
+		visual.position = Vector2(-7.0, -s_size.y * 0.5)
+		visual.color = Color(0.18, 0.22, 0.29, 0.92)
+		sb.add_child(visual)
+		var stripe := ColorRect.new()
+		stripe.size = Vector2(4.0, s_size.y)
+		stripe.position = Vector2(-2.0, -s_size.y * 0.5)
+		stripe.color = Color(0.95, 0.55, 0.15, 0.55)
+		sb.add_child(stripe)
+		divider.add_child(sb)
+
 
 func _spawn_building_prop(parent: Node, node_name: String, region: Rect2, pos: Vector2) -> Sprite2D:
 	var sp := Sprite2D.new()
@@ -274,6 +366,7 @@ func _spawn_building_prop(parent: Node, node_name: String, region: Rect2, pos: V
 	sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_BUILDINGS, region)
 	sp.offset = Vector2(0.0, -region.size.y * 0.4)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_add_solid_footprint(sp, Vector2(region.size.x * 0.72, maxf(16.0, region.size.y * 0.30)), Vector2(0.0, -region.size.y * 0.08))
 	parent.add_child(sp)
 	return sp
 
@@ -285,6 +378,7 @@ func _spawn_atmosphere_fx(parent: Node, node_name: String, region: Rect2, pos: V
 	sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_ATMOSPHERE, region)
 	sp.offset = Vector2(0.0, -region.size.y * 0.4)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_add_solid_footprint(sp, Vector2(16.0, 12.0), Vector2(0.0, -2.0))
 	parent.add_child(sp)
 	return sp
 
@@ -407,26 +501,30 @@ func _build_districts_and_entities() -> void:
 		add_child(l_node)
 		_lore_nodes[str(lid)] = l_node
 
-	# 8. Overpass Barrier & Boss Gatekeeper AI in District 5
-	_overpass_barrier = StaticBody2D.new()
-	_overpass_barrier.name = "OverpassBarrier"
-	_overpass_barrier.position = Vector2(1525, 640)
-	var ob_col := CollisionShape2D.new()
-	var ob_rect := RectangleShape2D.new()
-	ob_rect.size = Vector2(24, 180)
-	ob_col.shape = ob_rect
-	_overpass_barrier.add_child(ob_col)
-	var ob_sp := Sprite2D.new()
-	ob_sp.name = "BarrierSprite"
-	ob_sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_OBJECTS, Rect2(0, 64, 32, 32))
-	ob_sp.scale = Vector2(1.0, 4.0)
-	ob_sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_overpass_barrier.add_child(ob_sp)
+	# 8. East Sub-Station Barrier, Overpass Barrier & Boss Gatekeeper AI in District 5
+	_substation_barrier = _create_progression_barrier(
+		"EastSubstationBarrier",
+		Vector2(980.0, 656.0),
+		Vector2(26.0, 144.0),
+		"[TERKUNCI] T1 + SQ-01 + T2",
+		"Gerbang Gardu Timur terkunci! Selesaikan Terminal 1, SQ-01, & Terminal 2 dahulu."
+	)
+	add_child(_substation_barrier)
+
+	_overpass_barrier = _create_progression_barrier(
+		"OverpassBarrier",
+		Vector2(1525.0, 656.0),
+		Vector2(28.0, 192.0),
+		"[TERKUNCI] Terminal 3",
+		"Jembatan Overpass terkunci! Kalahkan Shield Sentinel & selesaikan Terminal 3 dahulu."
+	)
 	add_child(_overpass_barrier)
 
 	boss_ai = BossGatekeeperAI.new()
 	boss_ai.name = "BossGatekeeperAI"
 	boss_ai.position = Vector2(1790, 595)
+	boss_ai._build_visuals()
+	boss_ai._refresh_visuals()
 	boss_ai.subnode_unlocked.connect(_refresh_world_state)
 	boss_ai.boss_restored.connect(_on_boss_restored)
 	add_child(boss_ai)
@@ -438,6 +536,68 @@ func _build_districts_and_entities() -> void:
 		"[E] Gerbang Dunia 3"
 	)
 	add_child(_w3_gate_area)
+
+
+func _create_progression_barrier(node_name: String, pos: Vector2, size_vec: Vector2, status_text: String, toast_msg: String) -> StaticBody2D:
+	var barrier := StaticBody2D.new()
+	barrier.name = node_name
+	barrier.position = pos
+	barrier.collision_layer = 1
+	barrier.collision_mask = 0
+
+	var col := CollisionShape2D.new()
+	col.name = "CollisionShape2D"
+	var rect := RectangleShape2D.new()
+	rect.size = size_vec
+	col.shape = rect
+	barrier.add_child(col)
+
+	var beam_rect := ColorRect.new()
+	beam_rect.name = "BarrierBeam"
+	beam_rect.size = Vector2(8.0, size_vec.y)
+	beam_rect.position = Vector2(-4.0, -size_vec.y * 0.5)
+	beam_rect.color = Color(0.95, 0.22, 0.30, 0.52)
+	barrier.add_child(beam_rect)
+
+	var sp := Sprite2D.new()
+	sp.name = "BarrierSprite"
+	sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_OBJECTS, Rect2(0, 64, 32, 32))
+	sp.scale = Vector2(1.0, maxf(1.0, size_vec.y / 32.0))
+	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	barrier.add_child(sp)
+
+	var lbl := Label.new()
+	lbl.name = "StatusLabel"
+	lbl.text = status_text
+	lbl.position = Vector2(-95.0, -size_vec.y * 0.5 - 18.0)
+	lbl.custom_minimum_size = Vector2(190.0, 16.0)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color("#fca5a5"))
+	barrier.add_child(lbl)
+
+	var hint_zone := Area2D.new()
+	hint_zone.name = "HintZone"
+	hint_zone.collision_layer = 0
+	hint_zone.collision_mask = 1
+	var hz_col := CollisionShape2D.new()
+	var hz_rect := RectangleShape2D.new()
+	hz_rect.size = size_vec + Vector2(30.0, 8.0)
+	hz_col.shape = hz_rect
+	hint_zone.add_child(hz_col)
+	var msg_capture := toast_msg
+	var barrier_ref := barrier
+	hint_zone.body_entered.connect(func(b: Node2D) -> void:
+		if not barrier_ref.visible or Engine.is_editor_hint():
+			return
+		if b and b.is_in_group("player"):
+			var now_ms := Time.get_ticks_msec()
+			if now_ms - _barrier_toast_cooldown_ms >= 1500:
+				_barrier_toast_cooldown_ms = now_ms
+				_show_toast(msg_capture)
+	)
+	barrier.add_child(hint_zone)
+	return barrier
 
 
 func _create_station_area(node_name: String, tex: Texture2D, pos: Vector2, prompt_txt: String) -> Area2D:
@@ -458,6 +618,8 @@ func _create_station_area(node_name: String, tex: Texture2D, pos: Vector2, promp
 	sp.offset = Vector2(0.0, -16.0)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	area.add_child(sp)
+	var fp_size := Vector2(38.0, 16.0) if node_name == "Workbench" else Vector2(24.0, 14.0)
+	_add_solid_footprint(area, fp_size, Vector2(0.0, -4.0))
 
 	var p_lbl := Label.new()
 	p_lbl.name = "PromptLabel"
@@ -500,6 +662,7 @@ func _create_w2_terminal_node(term_id: String, pos: Vector2) -> Area2D:
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	area.add_child(sp)
 	_terminal_sprites[term_id] = sp
+	_add_solid_footprint(area, Vector2(24.0, 14.0), Vector2(0.0, -4.0))
 
 	var t_lbl := Label.new()
 	t_lbl.name = "TitleLabel"
@@ -967,13 +1130,16 @@ func _refresh_world_state() -> void:
 		else:
 			sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_OBJECTS, Rect2(0, 0, 32, 32))
 
+	# East Sub-Station Barrier open only after Terminal_1, SQ-01, and Terminal_2 are completed
+	var substation_t1_done := sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_1"))
+	var substation_sq1_done := sm.has_method("is_quest_completed") and bool(sm.call("is_quest_completed", "SQ-01"))
+	var substation_t2_done := sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_2"))
+	var substation_open := substation_t1_done and substation_sq1_done and substation_t2_done
+	_set_barrier_open(_substation_barrier, substation_open)
+
 	# Overpass Barrier open if Terminal_3 is solved
 	var t3_done := sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_3"))
-	if _overpass_barrier:
-		_overpass_barrier.visible = not t3_done
-		var col_node := _overpass_barrier.get_node_or_null("CollisionShape2D") as CollisionShape2D
-		if col_node:
-			col_node.set_deferred("disabled", t3_done)
+	_set_barrier_open(_overpass_barrier, t3_done)
 
 	# Update NPC Emotes
 	if _npcs_map.has("elder"):
@@ -1005,12 +1171,29 @@ func _refresh_world_state() -> void:
 			top_bar.set_status("Seluruh Misi Condition Canyon Selesai! Gerbang Dunia 3 Terbuka.", Color("#86efac"))
 
 
+func _set_barrier_open(barrier: StaticBody2D, is_open: bool) -> void:
+	if not barrier:
+		return
+	barrier.visible = not is_open
+	var col_node := barrier.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if col_node:
+		col_node.set_deferred("disabled", is_open)
+	var hz := barrier.get_node_or_null("HintZone") as Area2D
+	if hz:
+		hz.set_deferred("monitoring", not is_open)
+
+
 func _on_dex_emp_fired(origin: Vector2, radius: float, damage: float, stun_duration: float, emp_tier: int) -> void:
 	for en in get_tree().get_nodes_in_group("w2_enemies"):
 		if en and en.has_method("on_emp_hit"):
 			en.call("on_emp_hit", origin, radius, damage, stun_duration, emp_tier)
 	if boss_ai:
-		boss_ai.on_emp_hit(origin, radius)
+		var sm: Node = get_node_or_null("/root/SaveManager")
+		var t3_done := sm != null and sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_3"))
+		if t3_done:
+			boss_ai.on_emp_hit(origin, radius)
+		elif boss_ai.global_position.distance_to(origin) <= radius + 90.0:
+			_show_toast("Gatekeeper AI kebal! Selesaikan Terminal 3 (MQ-02) di Gardu Timur terlebih dahulu!")
 
 
 func _on_enemy_defeated(enemy: EnemyTopDown, e_type: int, _drop_pos: Vector2) -> void:
@@ -1082,12 +1265,23 @@ func _on_dex_interact_requested() -> void:
 
 
 func _try_open_w2_terminal(term_id: String) -> void:
+	var sm: Node = get_node_or_null("/root/SaveManager")
 	if term_id == "Terminal_3":
+		var t1_done := sm != null and sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_1"))
+		var sq1_done := sm != null and sm.has_method("is_quest_completed") and bool(sm.call("is_quest_completed", "SQ-01"))
+		var t2_done := sm != null and sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_2"))
+		if not (t1_done and sq1_done and t2_done):
+			_show_toast("Terminal 3 terkunci! Selesaikan Terminal 1, SQ-01, & Terminal 2 dahulu!")
+			return
 		var sentinel_alive := get_node_or_null("Enemies/ShieldSentinel_1") != null
-		var sm: Node = get_node_or_null("/root/SaveManager")
 		var sentinel_done := sm != null and sm.has_method("get_quest_flag") and bool(sm.call("get_quest_flag", "sentinel_defeated", false))
 		if sentinel_alive and not sentinel_done:
 			_show_toast("Terminal 3 dijaga Shield Sentinel! Rakit Shield-Breaker EMP Coil di Workbench lalu kalahkan Sentinel!")
+			return
+	if term_id == "Terminal_4A" or term_id == "Terminal_4B":
+		var t3_done := sm != null and sm.has_method("is_w2_terminal_solved") and bool(sm.call("is_w2_terminal_solved", "Terminal_3"))
+		if not t3_done:
+			_show_toast("Akses Inti Kota terkunci! Selesaikan Terminal 3 (MQ-02) terlebih dahulu!")
 			return
 	if term_id == "Terminal_4A" and boss_ai and boss_ai.phase == 0 and not boss_ai.subnode_ready:
 		_show_toast("Sub-Node terkunci perisai merah! Tembakkan EMP Pulse [F / Spasi] ke Boss terlebih dahulu!")

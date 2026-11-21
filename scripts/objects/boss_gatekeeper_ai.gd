@@ -20,7 +20,8 @@ var _state_lbl: Label = null
 
 func _ready() -> void:
 	y_sort_enabled = true
-	_build_visuals()
+	if not is_instance_valid(_sprite):
+		_build_visuals()
 	_refresh_visuals()
 
 
@@ -66,6 +67,18 @@ func _build_visuals() -> void:
 	_state_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_state_lbl.add_theme_font_size_override("font_size", 10)
 	add_child(_state_lbl)
+
+	var solid_body := StaticBody2D.new()
+	solid_body.name = "BossSolidBody"
+	solid_body.collision_layer = 1
+	solid_body.collision_mask = 0
+	var solid_col := CollisionShape2D.new()
+	var solid_rect := RectangleShape2D.new()
+	solid_rect.size = Vector2(56.0, 24.0)
+	solid_col.shape = solid_rect
+	solid_col.position = Vector2(0.0, -10.0)
+	solid_body.add_child(solid_col)
+	add_child(solid_body)
 
 
 func _refresh_visuals() -> void:

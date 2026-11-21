@@ -199,8 +199,25 @@ func _test_world2_scene_and_acts() -> void:
 			assert_true(inst.get_node_or_null("BossGatekeeperAI") != null, "BossGatekeeperAI exists")
 			for tid in ["Terminal_1", "Terminal_2", "Terminal_3", "Terminal_4A", "Terminal_4B"]:
 				assert_true(inst.get_node_or_null("Terminals/" + tid) != null, "%s exists" % tid)
+				assert_true(inst.get_node_or_null("Terminals/" + tid + "/SolidFootprint") != null, "%s has SolidFootprint" % tid)
 			for ov in ["TerminalOverlay", "WorkbenchOverlay", "UpgradeTreeOverlay", "QuestJournalOverlay", "StoryCutsceneOverlay"]:
 				assert_true(inst.get_node_or_null(ov) != null, "%s exists" % ov)
+			var terrain := inst.get_node_or_null("TerrainLayer") as TileMapLayer
+			assert_true(terrain != null and terrain.tile_set != null and terrain.tile_set.get_physics_layers_count() >= 1, "TerrainLayer has physics layer")
+			assert_true(inst.get_node_or_null("WorldPerimeterWalls") != null, "WorldPerimeterWalls exist")
+			assert_true(inst.get_node_or_null("SubstationBorderWalls") != null, "SubstationBorderWalls exist")
+			var sub_b := inst.get_node_or_null("EastSubstationBarrier") as StaticBody2D
+			var ov_b := inst.get_node_or_null("OverpassBarrier") as StaticBody2D
+			assert_true(sub_b != null and sub_b.visible, "Act 1: EastSubstationBarrier locked")
+			assert_true(ov_b != null and ov_b.visible, "Act 1: OverpassBarrier locked")
+		elif act_num == 2:
+			var sub_b2 := inst.get_node_or_null("EastSubstationBarrier") as StaticBody2D
+			var ov_b2 := inst.get_node_or_null("OverpassBarrier") as StaticBody2D
+			assert_true(sub_b2 != null and not sub_b2.visible, "Act 2: EastSubstationBarrier unlocked")
+			assert_true(ov_b2 != null and ov_b2.visible, "Act 2: OverpassBarrier locked")
+		elif act_num == 3:
+			var ov_b3 := inst.get_node_or_null("OverpassBarrier") as StaticBody2D
+			assert_true(ov_b3 != null and not ov_b3.visible, "Act 3: OverpassBarrier unlocked")
 
 		root.remove_child(inst)
 		inst.free()
