@@ -203,6 +203,22 @@ func _build_city_environment() -> void:
 			for ty in range(16):
 				src.create_tile(Vector2i(tx, ty))
 		ts.add_source(src, 0)
+		ts.add_physics_layer()
+		ts.set_physics_layer_collision_layer(0, 1)
+		ts.set_physics_layer_collision_mask(0, 1)
+		var chasm_poly := PackedVector2Array([
+			Vector2(-8.0, -8.0),
+			Vector2(8.0, -8.0),
+			Vector2(8.0, 8.0),
+			Vector2(-8.0, 8.0),
+		])
+		for chasm_x in range(4):
+			var chasm_coord := Vector2i(chasm_x, 9)
+			if src.has_tile(chasm_coord):
+				var td: TileData = src.get_tile_data(chasm_coord, 0)
+				if td:
+					td.set_collision_polygons_count(0, 1)
+					td.set_collision_polygon_points(0, 0, chasm_poly)
 		terrain.tile_set = ts
 
 		# Paint full canyon sand ground, cobblestone roads, canyon chasm, and steel bridge across 5 districts
@@ -266,6 +282,80 @@ func _build_city_environment() -> void:
 	# District 5: Canyon Overpass & Boss Arena
 	_spawn_building_prop(props_root, "Signpost_Boss", Rect2(288, 112, 96, 76), Vector2(1590, 560))
 
+	_build_perimeter_and_substation_fences()
+
+
+func _add_solid_footprint(parent: Node2D, size_vec: Vector2, offset_pos: Vector2 = Vector2.ZERO) -> StaticBody2D:
+	var body := StaticBody2D.new()
+	body.name = "SolidFootprint"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	var col := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size_vec
+	col.shape = rect
+	col.position = offset_pos
+	body.add_child(col)
+	parent.add_child(body)
+	return body
+
+
+func _build_perimeter_and_substation_fences() -> void:
+	var walls := Node2D.new()
+	walls.name = "WorldPerimeterWalls"
+	add_child(walls)
+
+	var bounds := [
+		["WallLeft", Vector2(-8.0, 640.0), Vector2(16.0, 1312.0)],
+		["WallRight", Vector2(1928.0, 640.0), Vector2(16.0, 1312.0)],
+		["WallTop", Vector2(960.0, -8.0), Vector2(1952.0, 16.0)],
+		["WallBottom", Vector2(960.0, 1288.0), Vector2(1952.0, 16.0)],
+	]
+	for b in bounds:
+		var wall := StaticBody2D.new()
+		wall.name = str(b[0])
+		wall.position = b[1] as Vector2
+		wall.collision_layer = 1
+		wall.collision_mask = 0
+		var col := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = b[2] as Vector2
+		col.shape = rect
+		wall.add_child(col)
+		walls.add_child(wall)
+
+	# District 2/3 -> District 4 cliff & fence divider at x = 980 (road opening y = 592..720)
+	var divider := Node2D.new()
+	divider.name = "SubstationBorderWalls"
+	add_child(divider)
+	var segments := [
+		["SubstationWallNorth", Vector2(980.0, 296.0), Vector2(24.0, 592.0)],
+		["SubstationWallSouth", Vector2(980.0, 1000.0), Vector2(24.0, 560.0)],
+	]
+	for seg in segments:
+		var sb := StaticBody2D.new()
+		sb.name = str(seg[0])
+		sb.position = seg[1] as Vector2
+		sb.collision_layer = 1
+		sb.collision_mask = 0
+		var s_size: Vector2 = seg[2] as Vector2
+		var col := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = s_size
+		col.shape = rect
+		sb.add_child(col)
+		var visual := ColorRect.new()
+		visual.size = Vector2(14.0, s_size.y)
+		visual.position = Vector2(-7.0, -s_size.y * 0.5)
+		visual.color = Color(0.18, 0.22, 0.29, 0.92)
+		sb.add_child(visual)
+		var stripe := ColorRect.new()
+		stripe.size = Vector2(4.0, s_size.y)
+		stripe.position = Vector2(-2.0, -s_size.y * 0.5)
+		stripe.color = Color(0.95, 0.55, 0.15, 0.55)
+		sb.add_child(stripe)
+		divider.add_child(sb)
+
 
 func _spawn_building_prop(parent: Node, node_name: String, region: Rect2, pos: Vector2) -> Sprite2D:
 	var sp := Sprite2D.new()
@@ -274,6 +364,7 @@ func _spawn_building_prop(parent: Node, node_name: String, region: Rect2, pos: V
 	sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_BUILDINGS, region)
 	sp.offset = Vector2(0.0, -region.size.y * 0.4)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_add_solid_footprint(sp, Vector2(region.size.x * 0.72, maxf(16.0, region.size.y * 0.30)), Vector2(0.0, -region.size.y * 0.08))
 	parent.add_child(sp)
 	return sp
 
@@ -285,6 +376,7 @@ func _spawn_atmosphere_fx(parent: Node, node_name: String, region: Rect2, pos: V
 	sp.texture = UiPixelTheme.load_atlas(UiPixelTheme.TEX_W2_ATMOSPHERE, region)
 	sp.offset = Vector2(0.0, -region.size.y * 0.4)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_add_solid_footprint(sp, Vector2(16.0, 12.0), Vector2(0.0, -2.0))
 	parent.add_child(sp)
 	return sp
 
@@ -458,6 +550,8 @@ func _create_station_area(node_name: String, tex: Texture2D, pos: Vector2, promp
 	sp.offset = Vector2(0.0, -16.0)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	area.add_child(sp)
+	var fp_size := Vector2(38.0, 16.0) if node_name == "Workbench" else Vector2(24.0, 14.0)
+	_add_solid_footprint(area, fp_size, Vector2(0.0, -4.0))
 
 	var p_lbl := Label.new()
 	p_lbl.name = "PromptLabel"
@@ -500,6 +594,7 @@ func _create_w2_terminal_node(term_id: String, pos: Vector2) -> Area2D:
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	area.add_child(sp)
 	_terminal_sprites[term_id] = sp
+	_add_solid_footprint(area, Vector2(24.0, 14.0), Vector2(0.0, -4.0))
 
 	var t_lbl := Label.new()
 	t_lbl.name = "TitleLabel"
