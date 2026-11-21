@@ -140,5 +140,67 @@ func test_world2_scene_and_entities_build() -> void:
 	assert_true(inst.get_node_or_null("BossGatekeeperAI") != null, "BossGatekeeperAI exists")
 	for tid in ["Terminal_1", "Terminal_2", "Terminal_3", "Terminal_4A", "Terminal_4B"]:
 		assert_true(inst.get_node_or_null("Terminals/" + tid) != null, "%s exists" % tid)
+		assert_true(inst.get_node_or_null("Terminals/" + tid + "/SolidFootprint") != null, "%s has SolidFootprint" % tid)
 	for ov in ["TerminalOverlay", "WorkbenchOverlay", "UpgradeTreeOverlay", "QuestJournalOverlay", "StoryCutsceneOverlay"]:
 		assert_true(inst.get_node_or_null(ov) != null, "%s exists" % ov)
+
+	var terrain := inst.get_node_or_null("TerrainLayer") as TileMapLayer
+	assert_true(terrain != null and terrain.tile_set != null, "TerrainLayer and TileSet exist")
+	if terrain and terrain.tile_set:
+		assert_true(terrain.tile_set.get_physics_layers_count() >= 1, "TerrainLayer TileSet has physics layer")
+		var atlas := terrain.tile_set.get_source(0) as TileSetAtlasSource
+		assert_true(atlas != null, "TerrainLayer has TileSetAtlasSource")
+		if atlas:
+			for cx in range(4):
+				var td_chasm := atlas.get_tile_data(Vector2i(cx, 9), 0)
+				assert_true(td_chasm != null and td_chasm.get_collision_polygons_count(0) == 1, "Chasm tile (%d, 9) has collision polygon" % cx)
+			var td_bridge := atlas.get_tile_data(Vector2i(0, 7), 0)
+			assert_true(td_bridge != null and td_bridge.get_collision_polygons_count(0) == 0, "Overpass bridge tile (0, 7) is walkable")
+
+	assert_true(inst.get_node_or_null("WorldPerimeterWalls") != null, "WorldPerimeterWalls exist")
+	assert_true(inst.get_node_or_null("SubstationBorderWalls") != null, "SubstationBorderWalls exist")
+	assert_true(inst.get_node_or_null("BuildingsAndProps/ScrapHavenTent/SolidFootprint") != null, "Building has SolidFootprint")
+	assert_true(inst.get_node_or_null("Workbench/SolidFootprint") != null, "Workbench has SolidFootprint")
+	assert_true(inst.get_node_or_null("BossGatekeeperAI/BossSolidBody") != null, "BossGatekeeperAI has BossSolidBody")
+
+	var sub_b := inst.get_node_or_null("EastSubstationBarrier") as StaticBody2D
+	var ov_b := inst.get_node_or_null("OverpassBarrier") as StaticBody2D
+	assert_true(sub_b != null and ov_b != null, "EastSubstationBarrier and OverpassBarrier exist")
+
+	var st := Engine.get_main_loop() as SceneTree
+	var sm_root: Node = st.root.get_node_or_null("/root/SaveManager") if st else null
+	if sm_root and sub_b and ov_b:
+		var was_sandbox := bool(sm_root.get("is_sandbox_act"))
+		sm_root.set("is_sandbox_act", true)
+		sm_root.call("_apply_defaults")
+		sm_root.set("is_sandbox_act", true)
+		inst.call("_refresh_world_state")
+
+		var sub_col := sub_b.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		var ov_col := ov_b.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		assert_true(sub_b.visible and sub_col != null and not sub_col.disabled, "Act 1 fresh: EastSubstationBarrier locked")
+		assert_true(ov_b.visible and ov_col != null and not ov_col.disabled, "Act 1 fresh: OverpassBarrier locked")
+
+		var boss_node := inst.get_node_or_null("BossGatekeeperAI") as BossGatekeeperAI
+		assert_true(boss_node != null, "BossGatekeeperAI typed")
+		if boss_node:
+			inst.call("_on_dex_emp_fired", boss_node.global_position, 80.0, 25.0, 0.6, 2)
+			assert_true(not boss_node.subnode_ready, "Boss rejects EMP before Terminal_3 solved")
+
+		sm_root.call("mark_w2_terminal_solved", "Terminal_1", 0)
+		sm_root.call("complete_quest", "MQ-01", 40)
+		sm_root.call("complete_quest", "SQ-01", 50)
+		sm_root.call("mark_w2_terminal_solved", "Terminal_2", 0)
+		inst.call("_refresh_world_state")
+		assert_true(not sub_b.visible, "EastSubstationBarrier opens after T1 + SQ-01 + T2")
+		assert_true(ov_b.visible, "OverpassBarrier stays locked before Terminal_3")
+
+		sm_root.call("mark_w2_terminal_solved", "Terminal_3", 0)
+		inst.call("_refresh_world_state")
+		assert_true(not ov_b.visible, "OverpassBarrier opens after Terminal_3")
+		if boss_node:
+			inst.call("_on_dex_emp_fired", boss_node.global_position, 80.0, 25.0, 0.6, 2)
+			assert_true(boss_node.subnode_ready, "Boss accepts EMP after Terminal_3 solved")
+
+		sm_root.set("is_sandbox_act", was_sandbox)
+		sm_root.call("load_save")
