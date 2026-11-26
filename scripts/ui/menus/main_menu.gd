@@ -316,7 +316,6 @@ func _build_ui() -> void:
 	var icon_world := _make_sheet_icon(UI_WORLD_BADGES_PATH, 0, 6)
 	var icon_bug := _make_sheet_icon(UI_STATUS_ICONS_PATH, 2, 4)
 	var icon_settings := _make_sheet_icon(UI_DEBUG_TOOLS_PATH, 0, 8)
-	var icon_quit := _make_sheet_icon(UI_STATUS_ICONS_PATH, 0, 4)
 
 	var b_play := _create_menu_button("LANJUT PETUALANGAN (Lv. 1)", COLOR_GREEN, icon_play)
 	b_play.pressed.connect(_on_continue_pressed)
@@ -339,9 +338,12 @@ func _build_ui() -> void:
 	b_settings.pressed.connect(_on_settings_pressed)
 	btn_vbox.add_child(b_settings)
 
-	var b_quit := _create_menu_button("KELUAR", Color(0.973, 0.443, 0.443), icon_quit)
-	b_quit.pressed.connect(_on_quit_pressed)
-	btn_vbox.add_child(b_quit)
+	# Hide Quit button on Web builds because browser tabs cannot execute tree.quit() cleanly
+	if not OS.has_feature("web"):
+		var icon_quit := _make_sheet_icon(UI_STATUS_ICONS_PATH, 0, 4)
+		var b_quit := _create_menu_button("KELUAR", Color(0.973, 0.443, 0.443), icon_quit)
+		b_quit.pressed.connect(_on_quit_pressed)
+		btn_vbox.add_child(b_quit)
 
 	# Keyboard / Gamepad focus loop
 	var btn_count := _menu_buttons.size()
@@ -1353,7 +1355,10 @@ func _build_settings_modal() -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		else:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-		_user_settings["fullscreen"] = toggled_on
+		var actual_fs := (DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
+		if OS.has_feature("web") and toggled_on and not actual_fs:
+			call_deferred("_sync_fullscreen_toggle", fs_check)
+		_user_settings["fullscreen"] = toggled_on if not OS.has_feature("web") else actual_fs
 		_save_user_settings()
 	)
 	UiPixelTheme.attach_button_sfx(fs_check)
@@ -1519,8 +1524,17 @@ func _load_user_settings() -> void:
 		_apply_bus_volume("Master", float(_user_settings["master_vol"]))
 		_apply_bus_volume("BGM", float(_user_settings["bgm_vol"]))
 		_apply_bus_volume("SFX", float(_user_settings["sfx_vol"]))
-	if bool(_user_settings.get("fullscreen", false)):
+	if not OS.has_feature("web") and bool(_user_settings.get("fullscreen", false)):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+func _sync_fullscreen_toggle(btn: CheckButton) -> void:
+	if not is_instance_valid(btn):
+		return
+	var actual_fs := (DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
+	btn.set_pressed_no_signal(actual_fs)
+	_user_settings["fullscreen"] = actual_fs
+	_save_user_settings()
 
 
 func _save_user_settings() -> void:
@@ -1697,6 +1711,8 @@ func _on_settings_pressed() -> void:
 
 
 func _on_quit_pressed() -> void:
+	if OS.has_feature("web"):
+		return
 	get_tree().quit()
 
 

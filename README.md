@@ -7,7 +7,10 @@
 ![Godot Engine](https://img.shields.io/badge/Godot-4.7.2--stable-478CBF?style=for-the-badge&logo=godot-engine&logoColor=white)
 ![GDScript](https://img.shields.io/badge/GDScript-2.0-355570?style=for-the-badge)
 ![Python Subset](https://img.shields.io/badge/Kurikulum-Python%203%20Subset-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Build](https://img.shields.io/badge/Build-V2.1%20Condition%20Canyon%20%2B%20Audio-22C55E?style=for-the-badge)
+![Build](https://img.shields.io/badge/Build-V2.2%20Web%20Export%20%2B%20Condition%20Canyon-22C55E?style=for-the-badge)
+[![Play in Browser](https://img.shields.io/badge/Play%20Online-GitHub%20Pages-0EA5E9?style=for-the-badge&logo=githubpages&logoColor=white)](https://atongers.github.io/CodeVerse-Debugger/)
+
+> 🎮 **Mainkan Langsung di Browser (GitHub Pages):** [https://atongers.github.io/CodeVerse-Debugger/](https://atongers.github.io/CodeVerse-Debugger/) *(WebAssembly Single-Threaded, tanpa instalasi)*
 
 *Kendalikan robot debugger **Dex** bersama pemandu AI **Lint** untuk memperbaiki baris kode Python yang rusak dan memulihkan dunia digital CodeVerse.*
 
