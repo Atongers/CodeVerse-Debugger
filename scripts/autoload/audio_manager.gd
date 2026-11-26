@@ -128,6 +128,7 @@ var _last_play_msec: Dictionary = {}
 var _duck_sources: Dictionary = {}
 var _duck_tween: Tween = null
 var _is_ducked: bool = false
+var _web_audio_unlocked: bool = false
 
 
 func _ready() -> void:
@@ -137,6 +138,28 @@ func _ready() -> void:
 	_build_randomizers()
 	load_user_settings()
 	_connect_save_manager()
+
+
+func _input(event: InputEvent) -> void:
+	if _web_audio_unlocked or not OS.has_feature("web"):
+		return
+	if (event is InputEventMouseButton or event is InputEventKey) and event.is_pressed():
+		_web_audio_unlocked = true
+		_ensure_web_streams_active()
+
+
+## Wakes up BGM/ambience streams if browser autoplay policy paused initial playback before first user gesture.
+func _ensure_web_streams_active() -> void:
+	if not _current_bgm_id.is_empty():
+		var bgm_p := _bgm_a if _bgm_active_is_a else _bgm_b
+		if is_instance_valid(bgm_p) and bgm_p.stream != null and (not bgm_p.playing or bgm_p.get_playback_position() <= 0.05):
+			bgm_p.volume_db = 0.0
+			bgm_p.play()
+	if not _current_amb_id.is_empty():
+		var amb_p := _amb_a if _amb_active_is_a else _amb_b
+		if is_instance_valid(amb_p) and amb_p.stream != null and (not amb_p.playing or amb_p.get_playback_position() <= 0.05):
+			amb_p.volume_db = 0.0
+			amb_p.play()
 
 
 ## Ensures Master -> BGMDuck -> BGM, Ambience, and SFX <- UI bus topology exists.
