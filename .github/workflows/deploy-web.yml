@@ -1,0 +1,132 @@
+name: Deploy Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "GDD/**"
+      - "documentation/**"
+      - "reference/**"
+      - ".agents/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7.2-stable"
+  TEMPLATES_DIR_NAME: "4.7.2.stable"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Strip missing local MCP addon from project.godot
+        run: |
+          if [ ! -f "addons/godot_ai/runtime/game_helper.gd" ]; then
+            python3 - <<'EOF'
+          with open("project.godot", "r", encoding="utf-8") as f:
+              lines = f.readlines()
+          filtered = []
+          skip_editor_plugins = False
+          for line in lines:
+              if line.strip().startswith("_mcp_game_helper="):
+                  continue
+              if line.strip() == "[editor_plugins]":
+                  skip_editor_plugins = True
+                  continue
+              if skip_editor_plugins and line.strip().startswith("enabled="):
+                  continue
+              skip_editor_plugins = False
+              filtered.append(line)
+          with open("project.godot", "w", encoding="utf-8") as f:
+              f.writelines(filtered)
+          EOF
+          fi
+
+      - name: Cache Godot binary and Web export templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/godot-bin
+            ~/.local/share/godot/export_templates/${{ env.TEMPLATES_DIR_NAME }}
+          key: godot-${{ env.GODOT_VERSION }}-web-templates-v1
+
+      - name: Install Godot and Web export templates
+        run: |
+          mkdir -p /tmp/godot-bin ~/.local/share/godot/export_templates
+          if [ ! -x /tmp/godot-bin/godot ]; then
+            curl -fSL "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_linux.x86_64.zip" -o /tmp/godot.zip
+            unzip -qo /tmp/godot.zip -d /tmp/godot-bin
+            mv "/tmp/godot-bin/Godot_v${{ env.GODOT_VERSION }}_linux.x86_64" /tmp/godot-bin/godot
+            chmod +x /tmp/godot-bin/godot
+          fi
+          if [ ! -d "$HOME/.local/share/godot/export_templates/${{ env.TEMPLATES_DIR_NAME }}" ]; then
+            curl -fSL "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_export_templates.tpz" -o /tmp/templates.tpz
+            mkdir -p /tmp/tpl_extract
+            unzip -qo /tmp/templates.tpz -d /tmp/tpl_extract
+            if [ -d /tmp/tpl_extract/templates ]; then
+              mv /tmp/tpl_extract/templates "$HOME/.local/share/godot/export_templates/${{ env.TEMPLATES_DIR_NAME }}"
+            else
+              mv /tmp/tpl_extract "$HOME/.local/share/godot/export_templates/${{ env.TEMPLATES_DIR_NAME }}"
+            fi
+          fi
+          /tmp/godot-bin/godot --headless --version
+
+      - name: Import project resources
+        run: /tmp/godot-bin/godot --headless --path . --import
+
+      - name: Run standalone headless test suites
+        timeout-minutes: 5
+        run: |
+          /tmp/godot-bin/godot --headless --path . --script res://scripts/tests/test_world_2.gd
+          /tmp/godot-bin/godot --headless --path . --script res://scripts/tests/test_audio_system.gd
+
+      - name: Smoke test Web pack (--export-pack & --main-pack)
+        timeout-minutes: 5
+        run: |
+          mkdir -p build
+          /tmp/godot-bin/godot --headless --path . --export-pack "Web" build/game_web.pck
+          /tmp/godot-bin/godot --headless --main-pack build/game_web.pck --quit-after 180 > build/pack_smoke.log 2>&1 || true
+          cat build/pack_smoke.log
+          if grep -nE "SCRIPT ERROR|Failed to instantiate an autoload|^ERROR:" build/pack_smoke.log; then
+            echo "Detected runtime/script error during --main-pack smoke test!"
+            exit 1
+          fi
+
+      - name: Export Web release build
+        run: |
+          mkdir -p build/web
+          /tmp/godot-bin/godot --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.html
+          test -f build/web/index.pck
+          test -f build/web/index.wasm
+          test -f build/web/index.js
+          ls -lh build/web/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
