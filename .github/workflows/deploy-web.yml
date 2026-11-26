@@ -104,7 +104,7 @@ jobs:
           /tmp/godot-bin/godot --headless --path . --export-pack "Web" build/game_web.pck
           /tmp/godot-bin/godot --headless --main-pack build/game_web.pck --quit-after 180 > build/pack_smoke.log 2>&1 || true
           cat build/pack_smoke.log
-          if grep -nE "SCRIPT ERROR|Failed to instantiate an autoload|^ERROR:" build/pack_smoke.log; then
+          if grep -nE "SCRIPT ERROR|Failed to instantiate an autoload|Resource not found|Can't open|Parse Error" build/pack_smoke.log || grep -n "^ERROR:" build/pack_smoke.log | grep -v "resources still in use at exit"; then
             echo "Detected runtime/script error during --main-pack smoke test!"
             exit 1
           fi
@@ -121,6 +121,8 @@ jobs:
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
